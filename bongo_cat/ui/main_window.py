@@ -12,6 +12,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QGraphicsDropShadowEffect, QSystemTrayIcon, QMenu, QAction
 from PyQt5.QtCore import QSettings, Qt
 
+try:
+    from PyQt5 import sip
+except ImportError:  # older PyQt5 ships sip as a top-level module
+    import sip  # type: ignore
+
 from ..models import ConfigManager, SkinManager, SoundManager, AchievementManager
 from ..utils import resource_path
 from .settings_panel import SettingsPanelWidget
@@ -748,7 +753,12 @@ class BongoCatWindow(QtWidgets.QWidget):
             if self.footer_widget.geometry().contains(event.pos()) or self.cat_label.geometry().contains(event.pos()):
                 self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
                 self.setCursor(Qt.CursorShape.ClosedHandCursor)
-                self.original_opacity = self.footer_opacity_effect.opacity()
+                self.footer_animation.stop()
+                if self._footer_effect_alive():
+                    self.original_opacity = self.footer_opacity_effect.opacity()
+                else:
+                    self.original_opacity = 1.0
+                self.footer_opacity_effect = None
                 shadow = QGraphicsDropShadowEffect()
                 shadow.setBlurRadius(20)
                 shadow.setOffset(0, 0)
@@ -961,19 +971,29 @@ class BongoCatWindow(QtWidgets.QWidget):
     # ----------------------
     #  Footer Fading
     # ----------------------
+    # setGraphicsEffect destroys the prior effect's C++ object, leaving the Python wrapper dangling.
+    def _footer_effect_alive(self) -> bool:
+        try:
+            effect = getattr(self, 'footer_opacity_effect', None)
+            if effect is None:
+                return False
+            return not sip.isdeleted(effect)
+        except Exception:
+            return False
+
     def fade_footer(self, fade_in: bool):
         """Fade the footer in or out."""
         # If the footer should always be visible
         if not self.config.hidden_footer:
             self.footer_widget.show()
-            
+
             # Make sure the opacity effect is valid
-            if not hasattr(self, 'footer_opacity_effect') or not self.footer_opacity_effect:
+            if not self._footer_effect_alive():
                 self.footer_opacity_effect = QtWidgets.QGraphicsOpacityEffect(self.footer_widget)
                 self.footer_widget.setGraphicsEffect(self.footer_opacity_effect)
                 self.footer_animation.setTargetObject(self.footer_opacity_effect)
                 self.footer_animation.setPropertyName(b"opacity")
-                
+
             self.footer_opacity_effect.setOpacity(1.0)
             return
 
@@ -982,7 +1002,7 @@ class BongoCatWindow(QtWidgets.QWidget):
             return
 
         # Create/validate the opacity effect
-        if not hasattr(self, 'footer_opacity_effect') or not self.footer_opacity_effect:
+        if not self._footer_effect_alive():
             self.footer_opacity_effect = QtWidgets.QGraphicsOpacityEffect(self.footer_widget)
             self.footer_widget.setGraphicsEffect(self.footer_opacity_effect)
             self.footer_animation.setTargetObject(self.footer_opacity_effect)
@@ -990,7 +1010,10 @@ class BongoCatWindow(QtWidgets.QWidget):
 
         # Set up and start the animation
         self.footer_animation.stop()
-        start_value = self.footer_opacity_effect.opacity()
+        if self._footer_effect_alive():
+            start_value = self.footer_opacity_effect.opacity()
+        else:
+            start_value = 0.0 if fade_in else 1.0
         end_value = 1.0 if fade_in else 0.0
 
         if fade_in:
@@ -1001,7 +1024,7 @@ class BongoCatWindow(QtWidgets.QWidget):
 
     def onFooterAnimationFinished(self):
         """Hide footer after fade out completes."""
-        if self.footer_opacity_effect and self.footer_opacity_effect.opacity() == 0.0 and self.config.hidden_footer:
+        if self._footer_effect_alive() and self.footer_opacity_effect.opacity() == 0.0 and self.config.hidden_footer:
             self.footer_widget.hide()
 
     # ----------------------
@@ -1315,9 +1338,11 @@ class BongoCatWindow(QtWidgets.QWidget):
         self.setup_footer_style()
         
         # Recreate the opacity effect to ensure it's valid
+        self.footer_animation.stop()
+        self.footer_opacity_effect = None
         self.footer_opacity_effect = QtWidgets.QGraphicsOpacityEffect(self.footer_widget)
         self.footer_widget.setGraphicsEffect(self.footer_opacity_effect)
-        
+
         # Reconnect animation to the new effect
         self.footer_animation.setTargetObject(self.footer_opacity_effect)
         self.footer_animation.setPropertyName(b"opacity")
