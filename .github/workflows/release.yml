@@ -1,0 +1,208 @@
+# Build Bongo Cat for Windows / Linux / macOS and publish a GitHub release.
+# Trigger: push of a v* tag (e.g. v2.0.1) or manual workflow_dispatch.
+# Outputs attached to the release:
+#   - BongoCat-windows-x64.exe
+#   - BongoCat-linux-x86_64.AppImage
+#   - BongoCat-macos.dmg
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: BongoCat-windows-x64.exe
+            artifact_path: dist/BongoCat-windows-x64.exe
+          - os: ubuntu-latest
+            artifact_name: BongoCat-linux-x86_64.AppImage
+            artifact_path: dist/BongoCat-linux-x86_64.AppImage
+          - os: macos-latest
+            artifact_name: BongoCat-macos.dmg
+            artifact_path: dist/BongoCat-macos.dmg
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Install Linux runtime libs for PyQt5 xcb
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-sync1 \
+            libxcb-xfixes0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1 \
+            libxkbcommon-x11-0 \
+            libfuse2
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install "pyinstaller>=5.0" "Pillow>=10.0.0"
+
+      - name: Build with PyInstaller
+        run: pyinstaller --clean --noconfirm bongo_cat.spec
+
+      # ---- Windows: rename the raw EXE ----
+      # TODO: signed Windows builds would require a code-signing certificate
+      # (e.g. via signtool.exe) — no cert available, so we ship unsigned.
+      - name: Stage Windows artifact
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          if (!(Test-Path dist/BongoCat.exe)) { throw "dist/BongoCat.exe missing" }
+          Move-Item dist/BongoCat.exe dist/BongoCat-windows-x64.exe
+
+      # ---- macOS: pack the .app bundle into a DMG ----
+      # TODO: macOS notarization would require Apple Developer credentials
+      # (APPLE_ID, APPLE_APP_PASSWORD, TEAM_ID + signing cert in keychain) —
+      # not configured, so the DMG is unsigned and will trigger Gatekeeper.
+      - name: Build macOS DMG
+        if: matrix.os == 'macos-latest'
+        run: |
+          if [ ! -d "dist/BongoCat.app" ]; then
+            echo "dist/BongoCat.app missing"
+            exit 1
+          fi
+          hdiutil create \
+            -volname "Bongo Cat" \
+            -srcfolder "dist/BongoCat.app" \
+            -ov \
+            -format UDZO \
+            "dist/BongoCat-macos.dmg"
+
+      # ---- Linux: build an AppImage from the single-file PyInstaller binary ----
+      - name: Build Linux AppImage
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          set -euo pipefail
+
+          if [ ! -f "dist/BongoCat" ]; then
+            echo "dist/BongoCat missing"
+            exit 1
+          fi
+
+          # Fetch appimagetool (official AppImageKit release).
+          APPIMAGETOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          curl -fsSL -o appimagetool "$APPIMAGETOOL_URL"
+          chmod +x appimagetool
+
+          # Assemble AppDir.
+          APPDIR="BongoCat.AppDir"
+          rm -rf "$APPDIR"
+          mkdir -p "$APPDIR/usr/bin"
+          cp dist/BongoCat "$APPDIR/usr/bin/bongocat"
+          chmod +x "$APPDIR/usr/bin/bongocat"
+
+          # Icon — appimagetool wants a top-level .png matching the desktop Icon=.
+          if [ -f img/cat-rest.png ]; then
+            cp img/cat-rest.png "$APPDIR/bongocat.png"
+          else
+            # 1x1 transparent placeholder so appimagetool stops complaining.
+            python -c "from PIL import Image; Image.new('RGBA',(1,1)).save('$APPDIR/bongocat.png')"
+          fi
+
+          cat > "$APPDIR/bongocat.desktop" <<'EOF'
+          [Desktop Entry]
+          Name=Bongo Cat
+          Exec=bongocat
+          Icon=bongocat
+          Type=Application
+          Categories=Game;
+          EOF
+
+          cat > "$APPDIR/AppRun" <<'EOF'
+          #!/bin/bash
+          SELF=$(readlink -f "$0")
+          HERE=${SELF%/*}
+          export PATH="${HERE}/usr/bin:${PATH}"
+          export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
+          exec "${HERE}/usr/bin/bongocat" "$@"
+          EOF
+          chmod +x "$APPDIR/AppRun"
+
+          # ARCH must be set for appimagetool output naming.
+          ARCH=x86_64 ./appimagetool "$APPDIR" "dist/BongoCat-linux-x86_64.AppImage"
+
+      - name: Verify artifact exists
+        shell: bash
+        run: |
+          ls -la "${{ matrix.artifact_path }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Flatten artifacts
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          # upload-artifact@v4 nests each upload under its name; flatten.
+          find artifacts -mindepth 2 -type f -exec cp {} release-assets/ \;
+          ls -la release-assets
+
+      # Pinned to v2 tag (not SHA) — softprops/action-gh-release publishes
+      # signed releases via tag-moving conventions; pinning by SHA would
+      # require manual rotation. Acceptable risk for a public hobby project.
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            release-assets/BongoCat-windows-x64.exe
+            release-assets/BongoCat-linux-x86_64.AppImage
+            release-assets/BongoCat-macos.dmg
+          fail_on_unmatched_files: true
