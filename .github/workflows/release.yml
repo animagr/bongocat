@@ -41,10 +41,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -165,7 +165,7 @@ jobs:
           ls -la "${{ matrix.artifact_path }}"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.artifact_path }}
@@ -180,7 +180,7 @@ jobs:
       contents: write
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artifacts
 
@@ -188,15 +188,15 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release-assets
-          # upload-artifact@v4 nests each upload under its name; flatten.
+          # download-artifact nests each artifact under its name; flatten.
           find artifacts -mindepth 2 -type f -exec cp {} release-assets/ \;
           ls -la release-assets
 
-      # Pinned to v2 tag (not SHA) — softprops/action-gh-release publishes
+      # Pinned to v3 tag (not SHA) — softprops/action-gh-release publishes
       # signed releases via tag-moving conventions; pinning by SHA would
       # require manual rotation. Acceptable risk for a public hobby project.
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
