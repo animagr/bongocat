@@ -29,11 +29,12 @@ class TestResourcePath(unittest.TestCase):
         self.assertIn("BongoCat", path)
         self.assertTrue(path.endswith("bongo.ini"))
 
-    @patch.dict(os.environ, {'APPDATA': '/test/appdata'})
     def test_resource_path_bongo_ini_custom_appdata(self):
         """Test bongo.ini path with custom APPDATA."""
-        path = resource_path("bongo.ini")
-        self.assertTrue(path.startswith("/test/appdata"))
+        with tempfile.TemporaryDirectory() as appdata:
+            with patch.dict(os.environ, {'APPDATA': appdata}):
+                path = resource_path("bongo.ini")
+        self.assertTrue(path.startswith(appdata))
         self.assertIn("BongoCat", path)
 
     def test_resource_path_regular_file(self):

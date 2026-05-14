@@ -1334,12 +1334,14 @@ class BongoCatWindow(QtWidgets.QWidget):
         # Apply settings
         self.config.save()
         
-        # Update the footer styling with new alpha
-        self.setup_footer_style()
-        
-        # Recreate the opacity effect to ensure it's valid
+        # Stop callbacks before replacing the graphics effect in setup_footer_style().
         self.footer_animation.stop()
         self.footer_opacity_effect = None
+
+        # Update the footer styling with new alpha
+        self.setup_footer_style()
+
+        # Recreate the opacity effect to ensure it's valid
         self.footer_opacity_effect = QtWidgets.QGraphicsOpacityEffect(self.footer_widget)
         self.footer_widget.setGraphicsEffect(self.footer_opacity_effect)
 
