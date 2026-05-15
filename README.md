@@ -4,7 +4,7 @@
 
 A desktop pet that slaps its paws whenever you press a key or click a mouse button. Frameless, always-on-top, draggable. Tracks slap count, builds combos, and unlocks achievements as you use it.
 
-[![Version](https://img.shields.io/github/v/release/luinbytes/bongocat)](https://github.com/luinbytes/bongocat/releases)
+[![Version](https://img.shields.io/github/v/release/animagr/bongocat)](https://github.com/animagr/bongocat/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## Install
@@ -15,14 +15,14 @@ Grab a pre-built release for your platform:
 - **macOS**: `BongoCat-macos.dmg` (unsigned, right-click → Open first launch)
 - **Linux**: `BongoCat-linux-x86_64.AppImage` (`chmod +x` then run)
 
-Latest: https://github.com/luinbytes/bongocat/releases/latest
+Latest: https://github.com/animagr/bongocat/releases/latest
 
 ## Run from source
 
 Requires Python 3.8–3.11 (PyQt5 does not ship wheels for 3.13+).
 
 ```bash
-git clone https://github.com/luinbytes/bongocat.git
+git clone https://github.com/animagr/bongocat.git
 cd bongocat
 pip install -r requirements.txt
 python -m bongo_cat
@@ -145,7 +145,7 @@ History is saved when you quit the app. Format is `{"2026-05-15": 42, "2026-05-1
 
 **`pyinstaller` not found.** Install it (`pip install "pyinstaller>=5.0"`) or invoke via `python -m PyInstaller`.
 
-**Bug report.** Open an issue: https://github.com/luinbytes/bongocat/issues
+**Bug report.** Open an issue: https://github.com/animagr/bongocat/issues
 
 ## Contributing
 
