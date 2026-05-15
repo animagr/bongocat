@@ -887,10 +887,6 @@ class BongoCatWindow(QtWidgets.QWidget):
         pause_action.triggered.connect(self.toggle_pause)
         menu.addAction(pause_action)
         
-        reset_action = QAction("Reset Count", self)
-        reset_action.triggered.connect(self.reset_count)
-        menu.addAction(reset_action)
-        
         quit_action = QAction("Quit", self)
         quit_action.triggered.connect(self.quit_app)
         menu.addAction(quit_action)
