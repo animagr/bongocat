@@ -5,7 +5,9 @@ import sys
 import subprocess
 import random
 import math
+import json
 import logging
+from datetime import date
 from typing import Optional
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -17,7 +19,7 @@ try:
 except ImportError:  # older PyQt5 ships sip as a top-level module
     import sip  # type: ignore
 
-from ..models import ConfigManager, SkinManager, SoundManager, AchievementManager
+from ..models import ConfigManager, SkinManager, AchievementManager
 from ..utils import resource_path
 from .settings_panel import SettingsPanelWidget
 from ..animations import constants as anim
@@ -29,7 +31,7 @@ class BongoCatWindow(QtWidgets.QWidget):
     """Main Bongo Cat application window.
     
     A frameless, always-on-top desktop pet that responds to keyboard,
-    mouse, and controller inputs with animated slapping motions.
+    mouse inputs with animated slapping motions.
     
     Attributes:
         trigger_slap: Signal emitted when input is detected
@@ -54,11 +56,6 @@ class BongoCatWindow(QtWidgets.QWidget):
         self.skin_manager = SkinManager()
         self.skin_manager.load_skin(self.config.current_skin)
 
-        self.sound_manager = SoundManager(
-            enabled=self.config.sound_enabled,
-            volume=self.config.sound_volume / 100.0
-        )
-
         self.achievement_manager = AchievementManager()
 
         # Initialize state variables
@@ -81,6 +78,12 @@ class BongoCatWindow(QtWidgets.QWidget):
         if self.config.always_show_points:
             self.show_total_slaps()
 
+        # Load slap history and init today's counter
+        self.slap_history_path = resource_path("slap_history.json")
+        self.slap_history = self._load_slap_history()
+        self.today_key = date.today().isoformat()
+        self.today_slaps_unsaved = 0
+
         # Increment launch count and check achievements
         self.config.launch_count += 1
         self.config.save()
@@ -89,15 +92,11 @@ class BongoCatWindow(QtWidgets.QWidget):
         time_achievements = self.achievement_manager.check_time_based()
         for achievement in time_achievements:
             self.show_achievement_notification(achievement)
-            if self.sound_manager.enabled:
-                self.sound_manager.play('achievement')
 
         # Check for launch count achievements
         launch_achievements = self.achievement_manager.check_launch_count(self.config.launch_count)
         for achievement in launch_achievements:
             self.show_achievement_notification(achievement)
-            if self.sound_manager.enabled:
-                self.sound_manager.play('achievement')
 
         logger.info("BongoCatWindow initialized")
 
@@ -817,6 +816,12 @@ class BongoCatWindow(QtWidgets.QWidget):
         if not self.is_hovering:
             self.fade_footer(False)
 
+    def quit_app(self):
+        """Save state and quit the application."""
+        self._save_slap_history()
+        self.settings.setValue('geometry', self.saveGeometry())
+        QtWidgets.QApplication.quit()
+
     def closeEvent(self, event):
         """Handle window close event."""
         self.settings.setValue('geometry', self.saveGeometry())
@@ -859,7 +864,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         tray_menu.addAction(reset_action)
         
         quit_action = QAction("Quit", self)
-        quit_action.triggered.connect(QtWidgets.QApplication.quit)
+        quit_action.triggered.connect(self.quit_app)
         tray_menu.addAction(quit_action)
         
         self.tray_icon.setContextMenu(tray_menu)
@@ -887,7 +892,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         menu.addAction(reset_action)
         
         quit_action = QAction("Quit", self)
-        quit_action.triggered.connect(QtWidgets.QApplication.quit)
+        quit_action.triggered.connect(self.quit_app)
         menu.addAction(quit_action)
         
         menu.exec_(self.mapToGlobal(position))
@@ -969,6 +974,29 @@ class BongoCatWindow(QtWidgets.QWidget):
                 )
 
     # ----------------------
+    #  Slap History
+    # ----------------------
+    def _load_slap_history(self) -> dict:
+        """Load daily slap history from JSON file."""
+        if not os.path.exists(self.slap_history_path):
+            return {}
+        try:
+            with open(self.slap_history_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            return {}
+
+    def _save_slap_history(self) -> None:
+        """Save daily slap history to JSON file."""
+        try:
+            self.slap_history[self.today_key] = self.slap_history.get(self.today_key, 0) + self.today_slaps_unsaved
+            self.today_slaps_unsaved = 0
+            with open(self.slap_history_path, 'w', encoding='utf-8') as f:
+                json.dump(self.slap_history, f, indent=2)
+        except (IOError, OSError) as e:
+            logger.error(f"Error saving slap history: {e}")
+
+    # ----------------------
     #  Footer Fading
     # ----------------------
     # setGraphicsEffect destroys the prior effect's C++ object, leaving the Python wrapper dangling.
@@ -1035,15 +1063,15 @@ class BongoCatWindow(QtWidgets.QWidget):
         logger.debug("do_slap called")
         if self.is_paused:
             return
-            
+
+        self.today_slaps_unsaved += 1
+
         self.config.slaps += 1
 
         # Check for slap-based achievements
         newly_unlocked = self.achievement_manager.check_slap_count(self.config.slaps)
         for achievement in newly_unlocked:
             self.show_achievement_notification(achievement)
-            if self.sound_manager.enabled:
-                self.sound_manager.play('achievement')
 
         # Update combo count and reset timeout
         current_time = QtCore.QTime.currentTime().msecsSinceStartOfDay()
@@ -1057,22 +1085,6 @@ class BongoCatWindow(QtWidgets.QWidget):
         newly_unlocked_combo = self.achievement_manager.check_combo(self.combo_count)
         for achievement in newly_unlocked_combo:
             self.show_achievement_notification(achievement)
-            if self.sound_manager.enabled:
-                self.sound_manager.play('achievement')
-
-        # Play slap sound
-        if self.sound_manager.enabled:
-            # Alternate between slap sounds randomly
-            alternate = random.random() > 0.5
-            self.sound_manager.play_slap(alternate=alternate)
-
-        # Play combo sound at milestones
-        if self.combo_count in [10, 25, 50, 100]:
-            if self.sound_manager.enabled:
-                if self.combo_count >= 50:
-                    self.sound_manager.play('combo_high')
-                else:
-                    self.sound_manager.play('combo')
 
         # Reset the timeout timer
         self.combo_timeout_timer.stop()
@@ -1263,10 +1275,6 @@ class BongoCatWindow(QtWidgets.QWidget):
             if current_index >= 0:
                 self.config.skin_dropdown.setCurrentIndex(current_index)
 
-            # Update sound settings
-            self.config.sound_enabled_checkbox.setChecked(self.config.sound_enabled)
-            self.config.sound_volume_slider.setValue(self.config.sound_volume)
-
             # Position the settings panel near the main window, ensuring it stays on screen
             screen = QtWidgets.QApplication.primaryScreen()
             if screen:
@@ -1324,12 +1332,6 @@ class BongoCatWindow(QtWidgets.QWidget):
             if current_skin:
                 icon_path = os.path.join(current_skin.path, current_skin.images['idle'])
                 self.tray_icon.setIcon(QtGui.QIcon(resource_path(icon_path)))
-
-        # Update sound settings
-        self.config.sound_enabled = self.config.sound_enabled_checkbox.isChecked()
-        self.config.sound_volume = self.config.sound_volume_slider.value()
-        self.sound_manager.enabled = self.config.sound_enabled
-        self.sound_manager.set_volume(self.config.sound_volume / 100.0)
 
         # Apply settings
         self.config.save()
@@ -1508,29 +1510,6 @@ class BongoCatWindow(QtWidgets.QWidget):
             self.config.skin_dropdown.setCurrentIndex(current_index)
         form_layout.addRow(self.create_settings_label("Cat Skin:"), self.config.skin_dropdown)
 
-        # Sound enabled toggle
-        self.config.sound_enabled_checkbox = QtWidgets.QCheckBox()
-        self.config.sound_enabled_checkbox.setChecked(self.config.sound_enabled)
-        self.config.sound_enabled_checkbox.setStyleSheet("color: white;")
-        form_layout.addRow(self.create_settings_label("Enable Sounds:"), self.config.sound_enabled_checkbox)
-
-        # Sound volume slider
-        self.config.sound_volume_slider = QtWidgets.QSlider(Qt.Orientation.Horizontal)
-        self.config.sound_volume_slider.setRange(0, 100)
-        self.config.sound_volume_slider.setValue(self.config.sound_volume)
-        self.config.sound_volume_slider.setTickPosition(QtWidgets.QSlider.TickPosition.TicksBelow)
-        self.config.sound_volume_slider.setTickInterval(10)
-
-        sound_volume_layout = QtWidgets.QHBoxLayout()
-        sound_volume_layout.addWidget(self.config.sound_volume_slider)
-        self.config.sound_volume_value = QtWidgets.QLabel(f"{self.config.sound_volume}%")
-        self.config.sound_volume_value.setStyleSheet("color: white; min-width: 40px;")
-        sound_volume_layout.addWidget(self.config.sound_volume_value)
-        self.config.sound_volume_slider.valueChanged.connect(
-            lambda value: self.config.sound_volume_value.setText(f"{value}%")
-        )
-        form_layout.addRow(self.create_settings_label("Sound Volume:"), sound_volume_layout)
-
         main_layout.addLayout(form_layout)
         
         # Add buttons layout
@@ -1569,7 +1548,18 @@ class BongoCatWindow(QtWidgets.QWidget):
         """)
         close_button.clicked.connect(self.settings_panel.hide)
         
+        quit_button = QtWidgets.QPushButton("Quit")
+        quit_button.setStyleSheet("""
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+        """)
+        quit_button.clicked.connect(self.quit_app)
+
         buttons_layout.addWidget(reset_button)
+        buttons_layout.addWidget(quit_button)
         buttons_layout.addStretch()
         buttons_layout.addWidget(apply_button)
         buttons_layout.addWidget(close_button)
@@ -1623,6 +1613,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         
         # Style specific buttons
         reset_button.setStyleSheet("background-color: #e74c3c; color: white;")
+        quit_button.setStyleSheet("background-color: #95a5a6; color: white;")
         apply_button.setStyleSheet("background-color: #2ecc71; color: white;")
         close_button.setStyleSheet("background-color: #3498db; color: white;")
 

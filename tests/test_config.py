@@ -25,8 +25,6 @@ class TestConfigDefaults(unittest.TestCase):
                 "max_slaps": "0",
                 "invert_cat": "false",
                 "current_skin": "default",
-                "sound_enabled": "true",
-                "sound_volume": "50",
                 "window_x": "-1",
                 "window_y": "-1"
             }

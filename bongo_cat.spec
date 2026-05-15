@@ -16,10 +16,6 @@ if os.path.exists('img'):
 if os.path.exists('skins'):
     datas += [('skins', 'skins')]
 
-# Add optional directories (sound effects are optional)
-if os.path.exists('sounds'):
-    datas += [('sounds', 'sounds')]
-
 # Add config file if it exists
 if os.path.exists('bongo.ini'):
     datas += [('bongo.ini', '.')]
@@ -30,7 +26,7 @@ datas += collect_data_files('PyQt5')
 # Collect hidden imports
 hiddenimports = []
 hiddenimports += collect_submodules('PyQt5')
-hiddenimports += ['pynput.keyboard', 'pynput.mouse', 'pygame', 'pygame.mixer']
+hiddenimports += ['pynput.keyboard', 'pynput.mouse']
 
 a = Analysis(
     ['bongo_cat/main.py'],

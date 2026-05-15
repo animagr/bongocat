@@ -45,7 +45,6 @@ class BongoCatBuilder:
             "pyinstaller>=5.0",
             "Pillow>=10.0.0",
             "PyQt5>=5.15.10",
-            "pygame>=2.6.0",
             "pynput>=1.7.6",
         ]
 
@@ -116,7 +115,7 @@ class BongoCatBuilder:
         iss_content = f"""
 [Setup]
 AppName=Bongo Cat
-AppVersion=2.0.0
+AppVersion=2.0.3
 AppPublisher=luinbytes
 DefaultDirName={{autopf}}\\BongoCat
 DefaultGroupName=Bongo Cat
@@ -130,7 +129,6 @@ ArchitecturesInstallIn64BitMode=x64
 Source: "dist\\BongoCat.exe"; DestDir: "{{app}}"; Flags: ignoreversion
 Source: "img\\*"; DestDir: "{{app}}\\img"; Flags: ignoreversion recursesubdirs
 Source: "skins\\*"; DestDir: "{{app}}\\skins"; Flags: ignoreversion recursesubdirs
-Source: "sounds\\*"; DestDir: "{{app}}\\sounds"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{{group}}\\Bongo Cat"; Filename: "{{app}}\\BongoCat.exe"

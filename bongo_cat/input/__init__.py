@@ -1,4 +1,4 @@
-"""Input handling for keyboard, mouse, and controller."""
+"""Input handling for keyboard and mouse."""
 
 from .input_manager import InputManager
 

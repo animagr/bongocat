@@ -8,7 +8,7 @@ from . import animations
 
 __version__ = "1.0.0"
 __author__ = "luinbytes"
-__description__ = "Interactive desktop pet that responds to keyboard, mouse, and controller inputs"
+__description__ = "Interactive desktop pet that responds to keyboard and mouse inputs"
 
 __all__ = [
     'ConfigManager',

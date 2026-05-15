@@ -1,6 +1,7 @@
 # Virtual environment
 venv/
 env/
+.venv/
 
 # Python cache files
 *.pyc
@@ -30,6 +31,8 @@ Thumbs.db
 
 # Config file (user-specific)
 bongo.ini
+achievements.json
+slap_history.json
 
 # PyInstaller working files (keep bongo_cat.spec)
 *.spec.bak

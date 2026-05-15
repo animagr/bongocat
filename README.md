@@ -2,7 +2,7 @@
 
 ![Bongo Cat](img/cat-rest.png)
 
-A desktop pet that slaps its paws whenever you press a key, click a mouse button, or push a controller input. Frameless, always-on-top, draggable. Tracks slap count, builds combos, and unlocks achievements as you use it.
+A desktop pet that slaps its paws whenever you press a key or click a mouse button. Frameless, always-on-top, draggable. Tracks slap count, builds combos, and unlocks achievements as you use it.
 
 [![Version](https://img.shields.io/github/v/release/luinbytes/bongocat)](https://github.com/luinbytes/bongocat/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -19,7 +19,7 @@ Latest: https://github.com/luinbytes/bongocat/releases/latest
 
 ## Run from source
 
-Requires Python 3.11. 3.8–3.10 still work; 3.12 needs pygame ≥ 2.6.
+Requires Python 3.8–3.11 (PyQt5 does not ship wheels for 3.13+).
 
 ```bash
 git clone https://github.com/luinbytes/bongocat.git
@@ -28,9 +28,29 @@ pip install -r requirements.txt
 python -m bongo_cat
 ```
 
+If your system Python is too new, use a virtual environment with an older version:
+
+**Windows** (assuming Python 3.11 is installed alongside a newer version):
+
+```powershell
+py -3.11 -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+python -m bongo_cat
+```
+
+**macOS / Linux**:
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m bongo_cat
+```
+
 ## Build a standalone
 
-Same path CI uses:
+Same path CI uses (run inside the venv if applicable):
 
 ```bash
 pip install -r requirements.txt "pyinstaller>=5.0" "Pillow>=10"
@@ -53,9 +73,9 @@ Hover the cat → ⚙ Settings opens the GUI. Click 📄 to open the ini directl
 
 Config file lives at:
 
-- **Windows**: `%APPDATA%/bongo.ini`
-- **macOS**: `~/Library/Application Support/bongo.ini`
-- **Linux**: `~/.config/bongo.ini`
+- **Windows**: `%APPDATA%/BongoCat/bongo.ini`
+- **macOS**: `~/.config/BongoCat/bongo.ini`
+- **Linux**: `~/.config/BongoCat/bongo.ini`
 
 | Key | Effect | Default |
 |-----|--------|---------|
@@ -67,8 +87,6 @@ Config file lives at:
 | `startup_with_windows` | autostart on login | `false` |
 | `max_slaps` | counter cap (0 = unlimited) | `0` |
 | `current_skin` | active skin folder name | `default` |
-| `sound_enabled` | play sound effects | `true` |
-| `sound_volume` | sound volume (0–100) | `50` |
 
 ## Custom skins
 
@@ -100,16 +118,15 @@ skins/your-skin/
 
 PNGs with transparency, any size (default art is ~200×200). All three poses required. Restart, then pick it from Settings.
 
-## Custom sounds
+## Slap history
 
-Drop WAV/OGG files into `sounds/default/`:
+Daily slap counts are tracked automatically and saved to `slap_history.json` in the same directory as the config:
 
-- `slap.wav` / `slap_alt.wav` — alternating slap sounds
-- `combo.wav` — combo milestone
-- `combo_high.wav` — high-tier combo (50+)
-- `achievement.wav` — achievement unlocked
+- **Windows**: `%APPDATA%/BongoCat/slap_history.json`
+- **macOS**: `~/Library/Application Support/BongoCat/slap_history.json`
+- **Linux**: `~/.config/BongoCat/slap_history.json`
 
-Keep them under 500 ms and normalized to a consistent volume.
+History is saved when you quit the app. Format is `{"2026-05-15": 42, "2026-05-16": 108}`.
 
 ## Achievements
 
@@ -125,10 +142,6 @@ Keep them under 500 ms and normalized to a consistent volume.
 - Windows: run as Administrator.
 - macOS: System Settings → Privacy & Security → Accessibility, allow the app.
 - Linux: add yourself to the `input` group.
-
-**Controller not detected.** Confirm pygame is installed (`pip install pygame`), reconnect the pad, relaunch.
-
-**No sound.** Confirm pygame is installed, sound is enabled in Settings, and `sounds/default/` exists with audio files.
 
 **`pyinstaller` not found.** Install it (`pip install "pyinstaller>=5.0"`) or invoke via `python -m PyInstaller`.
 

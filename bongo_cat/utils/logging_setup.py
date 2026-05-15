@@ -34,8 +34,8 @@ def setup_logging(name: str = "BongoCat", log_dir: Optional[str] = None) -> logg
         level=logging.INFO,
         format='%(asctime)s [%(levelname)s] %(message)s',
         handlers=[
-            logging.FileHandler(log_file, mode='w'),
-            logging.StreamHandler(sys.stdout)
+            logging.FileHandler(log_file, mode='w', encoding='utf-8'),
+            logging.StreamHandler(open(sys.stdout.fileno(), mode='w', encoding='utf-8', closefd=False))
         ]
     )
 
