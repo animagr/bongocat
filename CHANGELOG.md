@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.4] - 2026-05-18
+
+### Added
+
+- Science, measurement, and computing themed slap-count achievements, bringing the total achievement count to 70 and extending slap milestones to 10,000,000.
+- `RUN.bat` for launching the app from the repo root with the local virtual environment and keeping the console open.
+- Achievement regression tests for milestone ordering, uniqueness, total count, and high-tier unlock coverage.
+
+### Fixed
+
+- Footer graphics effect lifecycle issues when dragging the footer or applying footer settings.
+- macOS release workflow DMG creation now retries transient `hdiutil` failures.
+
 ## [2.0.3]
 
 ### Added

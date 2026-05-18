@@ -132,11 +132,11 @@ History is saved when you quit the app. Format is `{"2026-05-15": 42, "2026-05-1
 
 ## Achievements
 
-14 unlockables, saved to `achievements.json` next to the config.
+70 unlockables, saved to `achievements.json` next to the config.
 
-- **Slap count**: 1, 100, 500, 1,000, 5,000, 10,000
-- **Combos**: 10, 25, 50, 100, 200
-- **Hidden**: slap between midnight–3 AM, slap between 5–7 AM, hold a 60+ combo
+- **Slap count**: 1, 7, 8, 12, 32, 42, 46, 99, 100, 128, 206, 212, 314, 366, 460, 500, 767, 1,000, 1,024, 1,618, 1,760, 3,220, 3,959, 5,000, 5,280, 6,022, 6,371, 7,917, 8,760, 10,000, 10,080, 14,700, 24,901, 25,000, 27,182, 31,415, 32,768, 50,000, 65,536, 86,400, 100,000, 186,282, 238,855, 384,400, 524,288, 1,000,000, 1,048,576, 1,618,034, 2,718,282, 3,141,593, 5,280,000, 5,865,696, 10,000,000
+- **Combos**: 10, 25, 50, 100, 200, 300, 500, 1,000
+- **Hidden and special**: late-night, early-morning, weekend, launch-count, overload, speed, and marathon achievements
 
 ## Troubleshooting
 

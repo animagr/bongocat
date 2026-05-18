@@ -11,7 +11,7 @@ if os.path.exists("README.md"):
 
 setup(
     name="bongo-cat",
-    version="2.0.3",
+    version="2.0.4",
     author="luinbytes",
     description="Interactive desktop pet that responds to keyboard and mouse inputs",
     long_description=long_description,

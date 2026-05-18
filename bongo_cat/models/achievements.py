@@ -75,12 +75,116 @@ class AchievementManager:
                 requirement=1
             ),
             Achievement(
+                id="slaps_7",
+                name="Neutral Zone",
+                description="Reach 7 slaps, the neutral pH of pure water",
+                icon="💧",
+                category="slaps",
+                requirement=7
+            ),
+            Achievement(
+                id="slaps_8",
+                name="Byte Sized",
+                description="Reach 8 slaps, one for every bit in a byte",
+                icon="💾",
+                category="slaps",
+                requirement=8
+            ),
+            Achievement(
+                id="slaps_12",
+                name="Footwork",
+                description="Reach 12 slaps, one for every inch in a foot",
+                icon="📏",
+                category="slaps",
+                requirement=12
+            ),
+            Achievement(
+                id="slaps_32",
+                name="Freezing Point",
+                description="Reach 32 slaps, the freezing point of water in Fahrenheit",
+                icon="🧊",
+                category="slaps",
+                requirement=32
+            ),
+            Achievement(
+                id="slaps_42",
+                name="Answer to Everything",
+                description="Reach 42 slaps",
+                icon="✨",
+                category="slaps",
+                requirement=42
+            ),
+            Achievement(
+                id="slaps_46",
+                name="Chromosome Chorus",
+                description="Reach 46 slaps, one for every chromosome in a human cell",
+                icon="🧬",
+                category="slaps",
+                requirement=46
+            ),
+            Achievement(
+                id="slaps_99",
+                name="Body Heat",
+                description="Reach 99 slaps, roughly normal body temperature in Fahrenheit",
+                icon="🌡️",
+                category="slaps",
+                requirement=99
+            ),
+            Achievement(
                 id="slaps_100",
                 name="Century Club",
                 description="Reach 100 slaps",
                 icon="💯",
                 category="slaps",
                 requirement=100
+            ),
+            Achievement(
+                id="slaps_128",
+                name="IPv6 Initiate",
+                description="Reach 128 slaps, one for every bit in an IPv6 address",
+                icon="🌐",
+                category="slaps",
+                requirement=128
+            ),
+            Achievement(
+                id="slaps_206",
+                name="Bone Rhythm",
+                description="Reach 206 slaps, one for every bone in an adult human body",
+                icon="🦴",
+                category="slaps",
+                requirement=206
+            ),
+            Achievement(
+                id="slaps_212",
+                name="Boiling Point",
+                description="Reach 212 slaps, the boiling point of water in Fahrenheit",
+                icon="♨️",
+                category="slaps",
+                requirement=212
+            ),
+            Achievement(
+                id="slaps_314",
+                name="Pi Paws",
+                description="Reach 314 slaps, pi times one hundred",
+                icon="🥧",
+                category="slaps",
+                requirement=314
+            ),
+            Achievement(
+                id="slaps_366",
+                name="Leap Year",
+                description="Reach 366 slaps, one for every day in a leap year",
+                icon="📆",
+                category="slaps",
+                requirement=366
+            ),
+            Achievement(
+                id="slaps_460",
+                name="Absolute Zero",
+                description="Reach 460 slaps, absolute zero rounded in Fahrenheit",
+                icon="❄️",
+                category="slaps",
+                requirement=460
             ),
             Achievement(
                 id="slaps_500",
@@ -91,12 +195,60 @@ class AchievementManager:
                 requirement=500
             ),
             Achievement(
+                id="slaps_767",
+                name="Sound Barrier Warmup",
+                description="Reach 767 slaps, the speed of sound in mph at sea level",
+                icon="🔊",
+                category="slaps",
+                requirement=767
+            ),
+            Achievement(
                 id="slaps_1000",
                 name="Thousand Taps",
                 description="Reach 1,000 slaps",
                 icon="🎯",
                 category="slaps",
                 requirement=1000
+            ),
+            Achievement(
+                id="slaps_1024",
+                name="Kilobyte Club",
+                description="Reach 1,024 slaps, one for every byte in a kibibyte",
+                icon="🧮",
+                category="slaps",
+                requirement=1024
+            ),
+            Achievement(
+                id="slaps_1618",
+                name="Golden Paws",
+                description="Reach 1,618 slaps, the golden ratio times one thousand",
+                icon="φ",
+                category="slaps",
+                requirement=1618
+            ),
+            Achievement(
+                id="slaps_1760",
+                name="Yard Mile",
+                description="Reach 1,760 slaps, one for every yard in a mile",
+                icon="🛣️",
+                category="slaps",
+                requirement=1760
+            ),
+            Achievement(
+                id="slaps_3220",
+                name="Gravity Assist",
+                description="Reach 3,220 slaps, gravity in ft/s² times one hundred",
+                icon="🪐",
+                category="slaps",
+                requirement=3220
+            ),
+            Achievement(
+                id="slaps_3959",
+                name="Earth Core Tap",
+                description="Reach 3,959 slaps, Earth's average radius in miles",
+                icon="🌎",
+                category="slaps",
+                requirement=3959
             ),
             Achievement(
                 id="slaps_5000",
@@ -107,12 +259,76 @@ class AchievementManager:
                 requirement=5000
             ),
             Achievement(
+                id="slaps_5280",
+                name="Mile Marker",
+                description="Reach 5,280 slaps, one for every foot in a mile",
+                icon="🏁",
+                category="slaps",
+                requirement=5280
+            ),
+            Achievement(
+                id="slaps_6022",
+                name="Avogadro Appetizer",
+                description="Reach 6,022 slaps, Avogadro's mantissa times one thousand",
+                icon="⚗️",
+                category="slaps",
+                requirement=6022
+            ),
+            Achievement(
+                id="slaps_6371",
+                name="Metric Earth Core",
+                description="Reach 6,371 slaps, Earth's average radius in kilometers",
+                icon="🧭",
+                category="slaps",
+                requirement=6371
+            ),
+            Achievement(
+                id="slaps_7917",
+                name="Blue Marble",
+                description="Reach 7,917 slaps, Earth's average diameter in miles",
+                icon="🌏",
+                category="slaps",
+                requirement=7917
+            ),
+            Achievement(
+                id="slaps_8760",
+                name="Year of Hours",
+                description="Reach 8,760 slaps, one for every hour in a year",
+                icon="⌛",
+                category="slaps",
+                requirement=8760
+            ),
+            Achievement(
                 id="slaps_10000",
                 name="Ten Thousand Touches",
                 description="Reach 10,000 slaps",
                 icon="⭐",
                 category="slaps",
                 requirement=10000
+            ),
+            Achievement(
+                id="slaps_10080",
+                name="Week of Minutes",
+                description="Reach 10,080 slaps, one for every minute in a week",
+                icon="🗓️",
+                category="slaps",
+                requirement=10080
+            ),
+            Achievement(
+                id="slaps_14700",
+                name="Sea Level Standard",
+                description="Reach 14,700 slaps, atmospheric pressure in psi times one thousand",
+                icon="🌊",
+                category="slaps",
+                requirement=14700
+            ),
+            Achievement(
+                id="slaps_24901",
+                name="Earth Lap",
+                description="Reach 24,901 slaps, Earth's equatorial circumference in miles",
+                icon="🌍",
+                category="slaps",
+                requirement=24901
             ),
             Achievement(
                 id="slaps_25000",
@@ -123,6 +339,30 @@ class AchievementManager:
                 requirement=25000
             ),
             Achievement(
+                id="slaps_27182",
+                name="Euler Energy",
+                description="Reach 27,182 slaps, Euler's number times ten thousand",
+                icon="ℯ",
+                category="slaps",
+                requirement=27182
+            ),
+            Achievement(
+                id="slaps_31415",
+                name="Five-Digit Pi",
+                description="Reach 31,415 slaps, pi times ten thousand",
+                icon="π",
+                category="slaps",
+                requirement=31415
+            ),
+            Achievement(
+                id="slaps_32768",
+                name="Signed Short Stack",
+                description="Reach 32,768 slaps, 2 to the 15th power",
+                icon="🧱",
+                category="slaps",
+                requirement=32768
+            ),
+            Achievement(
                 id="slaps_50000",
                 name="Fifty Thousand Fury",
                 description="Reach 50,000 slaps",
@@ -131,12 +371,124 @@ class AchievementManager:
                 requirement=50000
             ),
             Achievement(
+                id="slaps_65536",
+                name="Sixteen-Bit Summit",
+                description="Reach 65,536 slaps, 2 to the 16th power",
+                icon="💿",
+                category="slaps",
+                requirement=65536
+            ),
+            Achievement(
+                id="slaps_86400",
+                name="Full Day Cycle",
+                description="Reach 86,400 slaps, one for every second in a day",
+                icon="🕛",
+                category="slaps",
+                requirement=86400
+            ),
+            Achievement(
                 id="slaps_100000",
                 name="One Hundred Thousand Legend",
                 description="Reach 100,000 slaps",
                 icon="🏆",
                 category="slaps",
                 requirement=100000
+            ),
+            Achievement(
+                id="slaps_186282",
+                name="Light Speed Snapshot",
+                description="Reach 186,282 slaps, the speed of light in miles per second",
+                icon="💡",
+                category="slaps",
+                requirement=186282
+            ),
+            Achievement(
+                id="slaps_238855",
+                name="Moonshot",
+                description="Reach 238,855 slaps, the average distance to the Moon in miles",
+                icon="🌕",
+                category="slaps",
+                requirement=238855
+            ),
+            Achievement(
+                id="slaps_384400",
+                name="Metric Moonshot",
+                description="Reach 384,400 slaps, the average distance to the Moon in kilometers",
+                icon="🚀",
+                category="slaps",
+                requirement=384400
+            ),
+            Achievement(
+                id="slaps_524288",
+                name="Nineteen-Bit Beat",
+                description="Reach 524,288 slaps, 2 to the 19th power",
+                icon="🖥️",
+                category="slaps",
+                requirement=524288
+            ),
+            Achievement(
+                id="slaps_1000000",
+                name="Megaslap",
+                description="Reach 1,000,000 slaps",
+                icon="🔬",
+                category="slaps",
+                requirement=1000000
+            ),
+            Achievement(
+                id="slaps_1048576",
+                name="True Megabyte",
+                description="Reach 1,048,576 slaps, 2 to the 20th power",
+                icon="💽",
+                category="slaps",
+                requirement=1048576
+            ),
+            Achievement(
+                id="slaps_1618034",
+                name="Golden Million",
+                description="Reach 1,618,034 slaps, the golden ratio scaled to a million",
+                icon="🏛️",
+                category="slaps",
+                requirement=1618034
+            ),
+            Achievement(
+                id="slaps_2718282",
+                name="Euler Engine",
+                description="Reach 2,718,282 slaps, Euler's number scaled to a million",
+                icon="📈",
+                category="slaps",
+                requirement=2718282
+            ),
+            Achievement(
+                id="slaps_3141593",
+                name="Pi Millionaire",
+                description="Reach 3,141,593 slaps, pi scaled to a million",
+                icon="🥧",
+                category="slaps",
+                requirement=3141593
+            ),
+            Achievement(
+                id="slaps_5280000",
+                name="Thousand-Mile March",
+                description="Reach 5,280,000 slaps, one for every foot in 1,000 miles",
+                icon="🗺️",
+                category="slaps",
+                requirement=5280000
+            ),
+            Achievement(
+                id="slaps_5865696",
+                name="Light Second",
+                description="Reach 5,865,696 slaps, the distance light travels in one second in feet",
+                icon="🌌",
+                category="slaps",
+                requirement=5865696
+            ),
+            Achievement(
+                id="slaps_10000000",
+                name="Ten Megaslaps",
+                description="Reach 10,000,000 slaps",
+                icon="🧠",
+                category="slaps",
+                requirement=10000000
             ),
 
             # Combo Achievements
