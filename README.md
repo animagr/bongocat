@@ -6,8 +6,9 @@ A desktop pet that slaps its paws whenever you press a key or click a mouse butt
 
 This fork removes sounds and associated dependencies, adds a slap history by day saved in slap_history.json in %AppData%/BongoCat
 
-[![Version](https://img.shields.io/github/v/release/animagr/bongocat)](https://github.com/animagr/bongocat/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+![GitHub last commit](https://img.shields.io/github/last-commit/animagr/bongocat/main)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/animagr/bongocat/main)
 
 ## Install
 

@@ -16,7 +16,7 @@ if %errorlevel% neq 0 (
 )
 
 REM Run build script
-python build.py
+py -3.11 build.py
 
 echo.
 echo Build complete! Check the dist folder.

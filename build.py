@@ -115,7 +115,7 @@ class BongoCatBuilder:
         iss_content = f"""
 [Setup]
 AppName=Bongo Cat
-AppVersion=2.0.4
+AppVersion=2.0.5
 AppPublisher=luinbytes
 DefaultDirName={{autopf}}\\BongoCat
 DefaultGroupName=Bongo Cat

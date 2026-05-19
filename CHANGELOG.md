@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5] - 2026-05-18
+
+### Fixed
+
+- `UpdateLayeredWindowIndirect` error on Windows caused by child widgets (combo pop, overload wobble/shake, floating +1 labels, achievement notifications) being positioned outside the translucent window bounds.
+
 ## [2.0.4] - 2026-05-18
 
 ### Added

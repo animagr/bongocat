@@ -541,6 +541,16 @@ class BongoCatWindow(QtWidgets.QWidget):
         self.combo_label.setText(f"+{self.combo_count}")
         self.combo_label.adjustSize()
         
+    def _clamp_geometry(self, x, y, w, h):
+        """Clamp a rectangle to stay within window bounds to avoid UpdateLayeredWindowIndirect errors."""
+        max_w = self.width()
+        max_h = self.height()
+        x = max(0, min(x, max_w - w))
+        y = max(0, min(y, max_h - h))
+        w = min(w, max_w - x)
+        h = min(h, max_h - y)
+        return x, y, max(1, w), max(1, h)
+
     def setup_combo_animations(self):
         """Setup animations for the combo counter."""
         if not self.combo_label:
@@ -551,15 +561,17 @@ class BongoCatWindow(QtWidgets.QWidget):
 
         if self.config.always_show_points and self.total_slaps_label.isVisible():
             y = self.total_slaps_label.y() + self.total_slaps_label.height() + anim.COMBO_POSITION_OFFSET_BELOW_TOTAL
-        
+
+        x = max(0, min(x, self.width() - self.combo_label.width()))
+        y = max(0, y)
         self.combo_label.move(x, y)
-        
+
         if self.combo_animation_group:
             self.combo_animation_group.stop()
             self.combo_animation_group = None
-        
+
         self.combo_animation_group = QtCore.QParallelAnimationGroup()
-        
+
         # Initial pop effect
         current_geometry = self.combo_label.geometry()
         expanded_width = int(current_geometry.width() * anim.COMBO_POP_SCALE)
@@ -567,12 +579,13 @@ class BongoCatWindow(QtWidgets.QWidget):
         x_offset = (expanded_width - current_geometry.width()) // 2
         y_offset = (expanded_height - current_geometry.height()) // 2
 
-        expanded_geometry = QtCore.QRect(
+        ex, ey, ew, eh = self._clamp_geometry(
             current_geometry.x() - x_offset,
             current_geometry.y() - y_offset,
             expanded_width,
             expanded_height
         )
+        expanded_geometry = QtCore.QRect(ex, ey, ew, eh)
 
         pop_animation = QtCore.QPropertyAnimation(self.combo_label, b"geometry")
         pop_animation.setDuration(anim.COMBO_POP_DURATION_MS)
@@ -651,7 +664,8 @@ class BongoCatWindow(QtWidgets.QWidget):
         
         new_x = self.combo_original_pos.x() - x_offset + wobble_x + shake_amount
         new_y = self.combo_original_pos.y() - y_offset + wobble_y + shake_amount
-        
+
+        new_x, new_y, new_width, new_height = self._clamp_geometry(new_x, new_y, new_width, new_height)
         self.combo_label.setGeometry(new_x, new_y, new_width, new_height)
 
         # Parse color components
@@ -1178,8 +1192,13 @@ class BongoCatWindow(QtWidgets.QWidget):
         x += random.randint(anim.FLOATING_HORIZONTAL_OFFSET_MIN, anim.FLOATING_HORIZONTAL_OFFSET_MAX)
         y = self.cat_height // 2 + anim.FLOATING_VERTICAL_CENTER_OFFSET
 
+        x = max(0, min(x, self.width() - slap_label.width()))
+        y = max(0, y)
+
         # Position shadow offset from main label
-        shadow_label.move(x + anim.FLOATING_SHADOW_OFFSET_X, y + anim.FLOATING_SHADOW_OFFSET_Y)
+        shadow_x = max(0, min(x + anim.FLOATING_SHADOW_OFFSET_X, self.width() - shadow_label.width()))
+        shadow_y = max(0, y + anim.FLOATING_SHADOW_OFFSET_Y)
+        shadow_label.move(shadow_x, shadow_y)
         shadow_label.show()
         shadow_label.raise_()
 
@@ -1651,10 +1670,8 @@ class BongoCatWindow(QtWidgets.QWidget):
                 y_offset += existing_notif.height() + 10  # 10px spacing between notifications
 
         # Position at top center of window, stacking vertically
-        notif.move(
-            (self.width() - notif.width()) // 2,
-            y_offset
-        )
+        notif_x = max(0, (self.width() - notif.width()) // 2)
+        notif.move(notif_x, y_offset)
 
         # Add to active notifications list
         self.active_notifications.append(notif)
