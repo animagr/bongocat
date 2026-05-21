@@ -1,0 +1,12 @@
+{
+  "name": "Belgian",
+  "author": "animagr",
+  "version": "1.0.0",
+  "description": "Belgian Dog",
+  "images": {
+    "idle": "rest.png",
+    "left": "left.png",
+    "right": "right.png"
+  },
+  "rotation_degrees": 0
+}

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.7] - 2026-05-21
+
+### Added
+
+- Per-skin `rotation_degrees` support when loading skin images.
+- Automatic runtime scaling for oversized skin images so custom skins fit the default Bongo Cat display footprint.
+- Belgian skin assets and metadata.
+
 ## [2.0.6] - 2026-05-20
 
 ### Added

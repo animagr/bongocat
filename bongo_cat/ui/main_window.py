@@ -140,19 +140,40 @@ class BongoCatWindow(QtWidgets.QWidget):
         # Use skin manager to get current skin images
         current_skin = self.skin_manager.current_skin
         if current_skin:
+            rotation_degrees = current_skin.rotation_degrees
+            max_size = self.get_default_cat_display_size(rotation_degrees)
+
             # Join skin path with image filename to get full path
             idle_path = os.path.join(current_skin.path, current_skin.images['idle'])
             left_path = os.path.join(current_skin.path, current_skin.images['left'])
             right_path = os.path.join(current_skin.path, current_skin.images['right'])
 
-            self.idle_pixmap_original = self.load_and_fix_image(resource_path(idle_path))
-            self.slap_pixmap_left_original = self.load_and_fix_image(resource_path(left_path))
-            self.slap_pixmap_right_original = self.load_and_fix_image(resource_path(right_path))
+            self.idle_pixmap_original = self.load_and_fix_image(
+                resource_path(idle_path),
+                rotation_degrees=rotation_degrees,
+                max_size=max_size
+            )
+            self.slap_pixmap_left_original = self.load_and_fix_image(
+                resource_path(left_path),
+                rotation_degrees=rotation_degrees,
+                max_size=max_size
+            )
+            self.slap_pixmap_right_original = self.load_and_fix_image(
+                resource_path(right_path),
+                rotation_degrees=rotation_degrees,
+                max_size=max_size
+            )
         else:
             # Fallback to default images
-            self.idle_pixmap_original = self.load_and_fix_image(resource_path("img/cat-rest.png"))
-            self.slap_pixmap_left_original = self.load_and_fix_image(resource_path("img/cat-left.png"))
-            self.slap_pixmap_right_original = self.load_and_fix_image(resource_path("img/cat-right.png"))
+            self.idle_pixmap_original = self.load_and_fix_image(
+                resource_path("img/cat-rest.png")
+            )
+            self.slap_pixmap_left_original = self.load_and_fix_image(
+                resource_path("img/cat-left.png")
+            )
+            self.slap_pixmap_right_original = self.load_and_fix_image(
+                resource_path("img/cat-right.png")
+            )
         
         # Working copies that will be stretched
         self.idle_pixmap = QtGui.QPixmap(self.idle_pixmap_original)
@@ -622,15 +643,45 @@ class BongoCatWindow(QtWidgets.QWidget):
     # ----------------------
     #  Image Handling
     # ----------------------
-    def load_and_fix_image(self, path):
-        """Loads an image and rotates it back to fix tilt."""
+    def get_default_cat_display_size(self, rotation_degrees):
+        """Return the built-in cat's displayed size after rotation."""
+        default_pixmap = QtGui.QPixmap(resource_path("img/cat-rest.png"))
+        if default_pixmap.isNull():
+            return None
+
+        transform = QtGui.QTransform()
+        transform.rotate(rotation_degrees)
+        return default_pixmap.transformed(
+            transform,
+            Qt.TransformationMode.SmoothTransformation
+        ).size()
+
+    def load_and_fix_image(self, path, rotation_degrees=None, max_size=None):
+        """Load, rotate, and optionally scale an image for display."""
         try:
             pixmap = QtGui.QPixmap(resource_path(path))
             if pixmap.isNull():
                 raise FileNotFoundError(f"Failed to load image: {path}")
             transform = QtGui.QTransform()
-            transform.rotate(anim.IMAGE_ROTATION_DEGREES)
-            return pixmap.transformed(transform, Qt.TransformationMode.SmoothTransformation)
+            if rotation_degrees is None:
+                rotation_degrees = anim.IMAGE_ROTATION_DEGREES
+            transform.rotate(rotation_degrees)
+            pixmap = pixmap.transformed(
+                transform,
+                Qt.TransformationMode.SmoothTransformation
+            )
+
+            if max_size and (
+                pixmap.width() > max_size.width()
+                or pixmap.height() > max_size.height()
+            ):
+                pixmap = pixmap.scaled(
+                    max_size,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation
+                )
+
+            return pixmap
         except (FileNotFoundError, Exception) as e:
             logger.error(f"Error loading image {path}: {e}")
             fallback = QtGui.QPixmap(100, 100)
