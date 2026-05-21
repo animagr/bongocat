@@ -23,7 +23,7 @@ class SkinInfo:
         rotation_degrees: Image rotation in degrees
         breathing_mode: Breathing animation mode ("stretch" or "scale")
         display_size: Optional maximum display size with width and height
-        trim_transparent: Whether to crop transparent padding before scaling
+        trim_transparent: Disabled metadata for cropping transparent padding
         breathing_speed: Optional animation speed override
     """
     name: str
@@ -35,7 +35,7 @@ class SkinInfo:
     rotation_degrees: int = -13
     breathing_mode: str = "stretch"
     display_size: Optional[Dict[str, int]] = None
-    trim_transparent: bool = False
+    # trim_transparent: bool = False
     breathing_speed: Optional[float] = None
 
 
@@ -139,7 +139,7 @@ class SkinManager:
                     rotation_degrees=metadata.get('rotation_degrees', -13),
                     breathing_mode=breathing_mode,
                     display_size=display_size,
-                    trim_transparent=metadata.get('trim_transparent', False),
+                    # trim_transparent=metadata.get('trim_transparent', False),
                     breathing_speed=breathing_speed
                 )
 

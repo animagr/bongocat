@@ -81,24 +81,24 @@ class TestPlantManager(unittest.TestCase):
         self.assertEqual(next_day_manager.stage, "seed")
         self.assertEqual(next_day_manager.state["date"], "2026-05-21")
 
-    def test_missing_species_loads_random_species_for_today(self):
+    def test_missing_species_loads_sunflower_by_default(self):
         with open(self.state_path, "w", encoding="utf-8") as f:
             json.dump({"date": "2026-05-20", "today_points": 0, "stage": "seed"}, f)
 
         with patch.object(PlantManager, "_random_species", return_value="cactus"):
             manager = self.make_manager()
 
-        self.assertEqual(manager.species, "cactus")
+        self.assertEqual(manager.species, "sunflower")
 
-    def test_species_persists_within_same_day(self):
+    def test_saved_species_is_ignored_while_random_species_disabled(self):
         manager = self.make_manager()
         manager.state["species"] = "cactus"
         manager.save()
 
         reload_manager = self.make_manager()
-        self.assertEqual(reload_manager.species, "cactus")
+        self.assertEqual(reload_manager.species, "sunflower")
 
-    def test_new_day_chooses_new_random_species(self):
+    def test_new_day_uses_sunflower_by_default(self):
         self.current_date = date(2026, 5, 20)
         with patch.object(PlantManager, "_random_species", side_effect=["sunflower", "cactus"]):
             manager = self.make_manager()
@@ -107,7 +107,18 @@ class TestPlantManager(unittest.TestCase):
             self.current_date = date(2026, 5, 21)
             next_day_manager = self.make_manager()
 
-        self.assertEqual(next_day_manager.species, "cactus")
+        self.assertEqual(next_day_manager.species, "sunflower")
+
+    def test_random_species_path_can_be_enabled(self):
+        self.current_date = date(2026, 5, 20)
+        with patch.object(PlantManager, "USE_RANDOM_SPECIES", True):
+            with patch.object(PlantManager, "_random_species", side_effect=["sunflower", "cactus"]):
+                manager = self.make_manager()
+                self.assertEqual(manager.species, "sunflower")
+
+                self.current_date = date(2026, 5, 21)
+                next_day_manager = self.make_manager()
+                self.assertEqual(next_day_manager.species, "cactus")
 
     def test_corrupt_state_falls_back_to_default(self):
         with open(self.state_path, "w", encoding="utf-8") as f:

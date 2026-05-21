@@ -73,7 +73,7 @@ Create a `skin.json` file with metadata:
 - `rotation_degrees` - Rotation angle (default: -13)
 - `breathing_mode` - `stretch` uses the original Bongo Cat slice-stretch animation; `scale` breathes by uniformly scaling the whole image without warping its aspect ratio.
 - `breathing_speed` - Optional idle breathing speed override. Lower values breathe more slowly; default is `0.05`.
-- `trim_transparent` - Optional boolean. When true, transparent padding is cropped before scaling.
+- `trim_transparent` - Currently disabled. Transparent padding is preserved while skin sizing is being tuned.
 - `display_size` - Optional maximum display box in pixels. Images scale into this box with their aspect ratio preserved, and the app window resizes to the resulting skin size.
 
 ### Step 4: Test Your Skin

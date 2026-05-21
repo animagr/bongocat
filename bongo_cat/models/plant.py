@@ -43,6 +43,7 @@ class PlantManager:
     ]
 
     SPECIES = "sunflower"
+    USE_RANDOM_SPECIES = False
 
     def __init__(
         self,
@@ -72,6 +73,8 @@ class PlantManager:
     @property
     def species(self) -> str:
         """Return the current plant species for today's display."""
+        if not self.USE_RANDOM_SPECIES:
+            return self.SPECIES
         return str(self.state.get("species", self.SPECIES))
 
     def record_slap(self, count: int = 1) -> bool:
@@ -154,7 +157,7 @@ class PlantManager:
         stage = self.stage_for_points(points)
         species = loaded.get("species")
         if not isinstance(species, str) or not species:
-            species = self._random_species()
+            species = self._default_species()
 
         return {
             "date": str(loaded.get("date", self.today_key)),
@@ -176,7 +179,7 @@ class PlantManager:
             "today_points": 0,
             "stage": "seed",
             "last_stage": "seed",
-            "species": self._random_species(),
+            "species": self._default_species(),
         }
 
     @classmethod
@@ -195,6 +198,12 @@ class PlantManager:
     def _random_species(cls) -> str:
         species = cls._available_species()
         return random.choice(species) if species else cls.SPECIES
+
+    @classmethod
+    def _default_species(cls) -> str:
+        if not cls.USE_RANDOM_SPECIES:
+            return cls.SPECIES
+        return cls._random_species()
 
     @staticmethod
     def _coerce_points(value: object) -> int:

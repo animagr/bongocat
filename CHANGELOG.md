@@ -5,13 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.8] - 2026-05-21
+
+### Changed
+
+- Daily plant display defaults back to the sunflower while alternate plant species are being resized.
+- Plant PNGs now preserve their transparent padding during display scaling instead of auto-cropping to visible pixels.
+- Skin PNGs also preserve transparent padding; the `trim_transparent` path is commented out until sizing is tuned.
+- Random plant species selection remains in the codebase behind a disabled flag for future re-enablement.
+
 ## [2.0.7] - 2026-05-21
 
 ### Added
 
 - Per-skin `rotation_degrees` support when loading skin images.
 - Per-skin `breathing_mode` and `breathing_speed` support, including aspect-preserving whole-image breathing for non-Bongo-shaped skins.
-- Optional per-skin `display_size` and `trim_transparent` metadata for scaling oversized custom skins while preserving their visible aspect ratio.
+- Optional per-skin `display_size` metadata for scaling oversized custom skins while preserving their visible aspect ratio.
 - Belgian skin assets and metadata.
 
 ## [2.0.6] - 2026-05-20

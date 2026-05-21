@@ -153,23 +153,23 @@ class BongoCatWindow(QtWidgets.QWidget):
             self.idle_pixmap_original = self.load_and_fix_image(
                 resource_path(idle_path),
                 rotation_degrees=rotation_degrees,
-                trim_transparent=current_skin.trim_transparent,
+                # trim_transparent=current_skin.trim_transparent,
                 max_size=max_size
             )
             self.slap_pixmap_left_original = self.load_and_fix_image(
                 resource_path(left_path),
                 rotation_degrees=rotation_degrees,
-                trim_transparent=current_skin.trim_transparent,
+                # trim_transparent=current_skin.trim_transparent,
                 max_size=max_size
             )
             self.slap_pixmap_right_original = self.load_and_fix_image(
                 resource_path(right_path),
                 rotation_degrees=rotation_degrees,
-                trim_transparent=current_skin.trim_transparent,
+                # trim_transparent=current_skin.trim_transparent,
                 max_size=max_size
             )
-            if current_skin.trim_transparent:
-                self.normalize_skin_frame_sizes(max_size)
+            # if current_skin.trim_transparent:
+            #     self.normalize_skin_frame_sizes(max_size)
         else:
             self.breathing_mode = "stretch"
             self.breathing_speed = anim.IDLE_ANIMATION_SPEED
@@ -501,7 +501,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         canvas = QtGui.QPixmap(self.plant_area_width, self.cat_height)
         canvas.fill(QtCore.Qt.GlobalColor.transparent)
 
-        stage_pixmap = self.load_cropped_pixmap(resource_path(self.plant_manager.image_path_for_stage(stage)))
+        stage_pixmap = self.load_plant_pixmap(resource_path(self.plant_manager.image_path_for_stage(stage)))
         stage_scaled = self.scale_pixmap_to_fit(
             stage_pixmap,
             anim.PLANT_STAGE_MAX_WIDTH,
@@ -515,7 +515,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         painter.drawPixmap(stage_x, stage_y, stage_scaled)
 
         if sparkle:
-            sparkle_pixmap = self.load_cropped_pixmap(resource_path(self.plant_manager.sparkle_image_path()))
+            sparkle_pixmap = self.load_plant_pixmap(resource_path(self.plant_manager.sparkle_image_path()))
             sparkle_scaled = self.scale_pixmap_to_fit(
                 sparkle_pixmap,
                 anim.PLANT_SPARKLE_MAX_WIDTH,
@@ -541,9 +541,9 @@ class BongoCatWindow(QtWidgets.QWidget):
             Qt.TransformationMode.SmoothTransformation
         )
 
-    def load_cropped_pixmap(self, path: str) -> QtGui.QPixmap:
-        """Load a pixmap and crop transparent whitespace around its content."""
-        cache_key = ("crop", path)
+    def load_plant_pixmap(self, path: str) -> QtGui.QPixmap:
+        """Load a plant pixmap while preserving transparent padding."""
+        cache_key = ("plant", path)
         if cache_key in self.plant_pixmap_cache:
             return QtGui.QPixmap(self.plant_pixmap_cache[cache_key])
 
@@ -552,30 +552,8 @@ class BongoCatWindow(QtWidgets.QWidget):
             logger.warning(f"Unable to load plant image: {path}")
             return pixmap
 
-        image = pixmap.toImage().convertToFormat(QtGui.QImage.Format.Format_ARGB32)
-        min_x = image.width()
-        min_y = image.height()
-        max_x = -1
-        max_y = -1
-
-        for y in range(image.height()):
-            for x in range(image.width()):
-                pixel = image.pixel(x, y)
-                if QtGui.qAlpha(pixel) > 0:
-                    min_x = min(min_x, x)
-                    min_y = min(min_y, y)
-                    max_x = max(max_x, x)
-                    max_y = max(max_y, y)
-
-        if max_x < min_x or max_y < min_y:
-            cropped = pixmap
-        else:
-            cropped = QtGui.QPixmap.fromImage(
-                image.copy(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
-            )
-
-        self.plant_pixmap_cache[cache_key] = QtGui.QPixmap(cropped)
-        return cropped
+        self.plant_pixmap_cache[cache_key] = QtGui.QPixmap(pixmap)
+        return pixmap
 
     def setup_footer(self):
         """Setup the footer widget."""
@@ -776,30 +754,30 @@ class BongoCatWindow(QtWidgets.QWidget):
 
         return QtCore.QSize(width, height)
 
-    def trim_pixmap_to_alpha(self, pixmap):
-        """Crop transparent padding from a pixmap."""
-        image = pixmap.toImage().convertToFormat(QtGui.QImage.Format.Format_ARGB32)
-        width = image.width()
-        height = image.height()
-        min_x = width
-        min_y = height
-        max_x = -1
-        max_y = -1
-
-        for y in range(height):
-            for x in range(width):
-                if QtGui.qAlpha(image.pixel(x, y)) > 0:
-                    min_x = min(min_x, x)
-                    min_y = min(min_y, y)
-                    max_x = max(max_x, x)
-                    max_y = max(max_y, y)
-
-        if max_x < min_x or max_y < min_y:
-            return pixmap
-
-        return QtGui.QPixmap.fromImage(
-            image.copy(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
-        )
+    # def trim_pixmap_to_alpha(self, pixmap):
+    #     """Crop transparent padding from a pixmap."""
+    #     image = pixmap.toImage().convertToFormat(QtGui.QImage.Format.Format_ARGB32)
+    #     width = image.width()
+    #     height = image.height()
+    #     min_x = width
+    #     min_y = height
+    #     max_x = -1
+    #     max_y = -1
+    #
+    #     for y in range(height):
+    #         for x in range(width):
+    #             if QtGui.qAlpha(image.pixel(x, y)) > 0:
+    #                 min_x = min(min_x, x)
+    #                 min_y = min(min_y, y)
+    #                 max_x = max(max_x, x)
+    #                 max_y = max(max_y, y)
+    #
+    #     if max_x < min_x or max_y < min_y:
+    #         return pixmap
+    #
+    #     return QtGui.QPixmap.fromImage(
+    #         image.copy(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
+    #     )
 
     def pad_pixmap_to_size(self, pixmap, width, height):
         """Place a pixmap bottom-centered on a transparent canvas."""
@@ -814,7 +792,7 @@ class BongoCatWindow(QtWidgets.QWidget):
 
         return canvas
 
-    def load_and_fix_image(self, path, rotation_degrees=None, trim_transparent=False, max_size=None):
+    def load_and_fix_image(self, path, rotation_degrees=None, max_size=None):
         """Load, rotate, and optionally scale an image for display."""
         try:
             pixmap = QtGui.QPixmap(resource_path(path))
@@ -829,8 +807,8 @@ class BongoCatWindow(QtWidgets.QWidget):
                 Qt.TransformationMode.SmoothTransformation
             )
 
-            if trim_transparent:
-                pixmap = self.trim_pixmap_to_alpha(pixmap)
+            # if trim_transparent:
+            #     pixmap = self.trim_pixmap_to_alpha(pixmap)
 
             if max_size and (
                 pixmap.width() > max_size.width()
