@@ -139,21 +139,6 @@ Growth stages are saved separately in `plant_state.json` next to the config and 
 
 The app loads species from subfolders in the `plant/` directory and picks a random species each day. To add another companion plant, create a new folder under `plant/` with the same stage image names as the existing sunflower species, and include an optional `sparkle.png` overlay:
 
-- `seed.png`
-- `seedling.png`
-- `growing1.png`
-- `young.png`
-- `growing2.png`
-- `growing3.png`
-- `mature.png`
-- `flowering.png`
-- `seed-bearing.png`
-- `sparkle.png` (optional overlay shown on stage transitions)
-
-Restart the app after adding a new plant folder so it can be discovered. You can also change the daily growth thresholds in `bongo_cat/models/plant.py` by editing `PlantManager.STAGES`.
-
-Current sunflower stages:
-
 - `seed`: 0 daily slaps
 - `seedling`: 1,000 daily slaps
 - `growing1`: 2,500 daily slaps
@@ -163,6 +148,9 @@ Current sunflower stages:
 - `mature`: 16,000 daily slaps
 - `flowering`: 20,000 daily slaps
 - `seed-bearing`: 25,000 daily slaps
+- `sparkle.png` (optional overlay shown on stage transitions)
+
+Restart the app after adding a new plant folder so it can be discovered. You can also change the daily growth thresholds in `bongo_cat/models/plant.py` by editing `PlantManager.STAGES`.
 
 Stage changes show a brief sparkle animation. Watering, wilting, harvesting, and multiple species are not implemented yet.
 
