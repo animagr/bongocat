@@ -1,6 +1,6 @@
 """Bongo Cat Desktop Buddy - A reactive desktop pet application."""
 
-from .models import ConfigManager
+from .models import ConfigManager, PlantManager
 from .ui import BongoCatWindow, SettingsPanelWidget
 from .input import InputManager
 from .utils import resource_path, setup_logging
@@ -12,6 +12,7 @@ __description__ = "Interactive desktop pet that responds to keyboard and mouse i
 
 __all__ = [
     'ConfigManager',
+    'PlantManager',
     'BongoCatWindow',
     'SettingsPanelWidget',
     'InputManager',

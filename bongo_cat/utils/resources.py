@@ -23,7 +23,7 @@ def resource_path(relative_path: str) -> str:
         >>> resource_path("bongo.ini")
         '/home/user/.config/BongoCat/bongo.ini'  # or %APPDATA%/BongoCat on Windows
     """
-    appdata_files = {"bongo.ini", "slap_history.json", "achievements.json"}
+    appdata_files = {"bongo.ini", "slap_history.json", "achievements.json", "plant_state.json"}
     if relative_path in appdata_files:
         appdata = os.getenv("APPDATA")
         if appdata is None:

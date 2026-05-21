@@ -19,7 +19,7 @@ try:
 except ImportError:  # older PyQt5 ships sip as a top-level module
     import sip  # type: ignore
 
-from ..models import ConfigManager, SkinManager, AchievementManager
+from ..models import ConfigManager, SkinManager, AchievementManager, PlantManager
 from ..utils import resource_path
 from .settings_panel import SettingsPanelWidget
 from ..animations import constants as anim
@@ -57,6 +57,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         self.skin_manager.load_skin(self.config.current_skin)
 
         self.achievement_manager = AchievementManager()
+        self.plant_manager = PlantManager()
 
         # Initialize state variables
         self.is_paused = False
@@ -65,6 +66,8 @@ class BongoCatWindow(QtWidgets.QWidget):
         self.footer_dragging = False
         self.current_side = "left"
         self.active_notifications = []  # Track active achievement notifications
+        self.plant_pixmap_cache = {}
+        self.plant_sparkle_active = False
         
         # Setup window and UI
         self.setup_window()
@@ -127,6 +130,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         self.setup_cat_images()
         self.setup_main_container()
         self.setup_cat_label()
+        self.setup_plant_label()
         self.setup_footer()
         self.setup_combo_counter()
         self.setup_total_slaps_label()
@@ -158,18 +162,43 @@ class BongoCatWindow(QtWidgets.QWidget):
         self.cat_width = self.idle_pixmap.width()
         self.cat_height = self.idle_pixmap.height()
         self.footer_height = anim.FOOTER_HEIGHT
-        self.setFixedSize(self.cat_width, self.cat_height + self.footer_height)
+        self.update_window_size()
+
+    def update_window_size(self):
+        """Update window and child geometry after image dimensions change."""
+        self.plant_area_width = anim.PLANT_AREA_WIDTH
+        self.plant_x = max(0, self.cat_width - anim.PLANT_OVERLAP)
+        self.window_width = self.cat_width + self.plant_area_width - anim.PLANT_OVERLAP
+        self.window_height = self.cat_height + self.footer_height
+        self.setFixedSize(self.window_width, self.window_height)
+
+        if hasattr(self, 'container'):
+            self.container.setGeometry(0, 0, self.window_width, self.window_height)
+        if hasattr(self, 'background'):
+            self.background.setGeometry(0, 0, self.window_width, self.window_height)
+        if hasattr(self, 'cat_label'):
+            self.cat_label.setGeometry(0, 0, self.cat_width, self.cat_height)
+        if hasattr(self, 'plant_label'):
+            self.plant_label.setGeometry(
+                self.plant_x,
+                anim.PLANT_Y_OFFSET,
+                self.plant_area_width,
+                self.cat_height
+            )
+            self.update_plant_display()
+        if hasattr(self, 'footer_widget'):
+            self.footer_widget.setGeometry(0, self.cat_height - 60, self.cat_width, self.footer_height)
 
     def setup_main_container(self):
         """Setup the main container widget."""
         self.container = QtWidgets.QWidget(self)
-        self.container.setGeometry(0, 0, self.cat_width, self.cat_height + self.footer_height)
+        self.container.setGeometry(0, 0, self.window_width, self.window_height)
         self.container.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.container.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
         self.container.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)
 
         self.background = QtWidgets.QWidget(self.container)
-        self.background.setGeometry(0, 0, self.cat_width, self.cat_height + self.footer_height)
+        self.background.setGeometry(0, 0, self.window_width, self.window_height)
         self.background.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.background.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
         self.background.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)
@@ -198,6 +227,23 @@ class BongoCatWindow(QtWidgets.QWidget):
         self.idle_timer = QtCore.QTimer(self)
         self.idle_timer.timeout.connect(self.update_idle_stretch)
         self.idle_timer.start(anim.IDLE_TIMER_MS)
+
+    def setup_plant_label(self):
+        """Setup the daily sunflower companion label."""
+        self.plant_label = QtWidgets.QLabel(self.container)
+        self.plant_label.setGeometry(
+            self.plant_x,
+            anim.PLANT_Y_OFFSET,
+            self.plant_area_width,
+            self.cat_height
+        )
+        self.plant_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.plant_label.setMouseTracking(True)
+        self.plant_label.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+        self.plant_label.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
+        self.plant_label.setToolTip("Today's slap-grown sunflower")
+        self.update_plant_display()
+        self.plant_label.raise_()
 
     def update_idle_stretch(self):
         """Update the cat's stretch animation frame with smooth transitions."""
@@ -295,6 +341,114 @@ class BongoCatWindow(QtWidgets.QWidget):
             
         # Update the cat label
         self.cat_label.setPixmap(new_pixmap)
+
+    def update_plant_display(self, sparkle: bool = False):
+        """Render the current daily plant stage."""
+        if not hasattr(self, 'plant_label'):
+            return
+
+        stage = self.plant_manager.stage
+        pixmap = self.build_plant_pixmap(stage, sparkle=sparkle)
+        self.plant_label.setPixmap(pixmap)
+
+        points = self.plant_manager.today_points
+        self.plant_label.setToolTip(f"Today's sunflower: {stage} ({points:,} slaps)")
+
+    def show_plant_sparkle(self):
+        """Briefly show sparkle overlay when the plant reaches a new stage."""
+        self.plant_sparkle_active = True
+        self.update_plant_display(sparkle=True)
+        QtCore.QTimer.singleShot(anim.PLANT_SPARKLE_DURATION_MS, self.hide_plant_sparkle)
+
+    def hide_plant_sparkle(self):
+        """Return the plant to its normal stage image after sparkle."""
+        self.plant_sparkle_active = False
+        self.update_plant_display()
+
+    def build_plant_pixmap(self, stage: str, sparkle: bool = False) -> QtGui.QPixmap:
+        """Build a scaled plant pixmap for the current window size."""
+        cache_key = (stage, sparkle, self.plant_area_width, self.cat_height)
+        if cache_key in self.plant_pixmap_cache:
+            return QtGui.QPixmap(self.plant_pixmap_cache[cache_key])
+
+        canvas = QtGui.QPixmap(self.plant_area_width, self.cat_height)
+        canvas.fill(QtCore.Qt.GlobalColor.transparent)
+
+        stage_pixmap = self.load_cropped_pixmap(resource_path(self.plant_manager.image_path_for_stage(stage)))
+        stage_scaled = self.scale_pixmap_to_fit(
+            stage_pixmap,
+            anim.PLANT_STAGE_MAX_WIDTH,
+            min(anim.PLANT_STAGE_MAX_HEIGHT, self.cat_height)
+        )
+
+        stage_x = (self.plant_area_width - stage_scaled.width()) // 2
+        stage_y = self.cat_height - stage_scaled.height() - anim.PLANT_BOTTOM_MARGIN
+
+        painter = QtGui.QPainter(canvas)
+        painter.drawPixmap(stage_x, stage_y, stage_scaled)
+
+        if sparkle:
+            sparkle_pixmap = self.load_cropped_pixmap(resource_path(self.plant_manager.sparkle_image_path()))
+            sparkle_scaled = self.scale_pixmap_to_fit(
+                sparkle_pixmap,
+                anim.PLANT_SPARKLE_MAX_WIDTH,
+                min(anim.PLANT_SPARKLE_MAX_HEIGHT, self.cat_height)
+            )
+            sparkle_x = (self.plant_area_width - sparkle_scaled.width()) // 2
+            sparkle_y = max(0, stage_y + (stage_scaled.height() - sparkle_scaled.height()) // 2)
+            painter.drawPixmap(sparkle_x, sparkle_y, sparkle_scaled)
+
+        painter.end()
+
+        self.plant_pixmap_cache[cache_key] = QtGui.QPixmap(canvas)
+        return canvas
+
+    def scale_pixmap_to_fit(self, pixmap: QtGui.QPixmap, max_width: int, max_height: int) -> QtGui.QPixmap:
+        """Scale a pixmap to fit within max dimensions while preserving aspect."""
+        if pixmap.isNull():
+            return pixmap
+        return pixmap.scaled(
+            max_width,
+            max_height,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+
+    def load_cropped_pixmap(self, path: str) -> QtGui.QPixmap:
+        """Load a pixmap and crop transparent whitespace around its content."""
+        cache_key = ("crop", path)
+        if cache_key in self.plant_pixmap_cache:
+            return QtGui.QPixmap(self.plant_pixmap_cache[cache_key])
+
+        pixmap = QtGui.QPixmap(path)
+        if pixmap.isNull():
+            logger.warning(f"Unable to load plant image: {path}")
+            return pixmap
+
+        image = pixmap.toImage().convertToFormat(QtGui.QImage.Format.Format_ARGB32)
+        min_x = image.width()
+        min_y = image.height()
+        max_x = -1
+        max_y = -1
+
+        for y in range(image.height()):
+            for x in range(image.width()):
+                pixel = image.pixel(x, y)
+                if QtGui.qAlpha(pixel) > 0:
+                    min_x = min(min_x, x)
+                    min_y = min(min_y, y)
+                    max_x = max(max_x, x)
+                    max_y = max(max_y, y)
+
+        if max_x < min_x or max_y < min_y:
+            cropped = pixmap
+        else:
+            cropped = QtGui.QPixmap.fromImage(
+                image.copy(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
+            )
+
+        self.plant_pixmap_cache[cache_key] = QtGui.QPixmap(cropped)
+        return cropped
 
     def setup_footer(self):
         """Setup the footer widget."""
@@ -837,6 +991,7 @@ class BongoCatWindow(QtWidgets.QWidget):
     def quit_app(self):
         """Save state and quit the application."""
         self._save_slap_history()
+        self.plant_manager.save()
         self.settings.setValue('geometry', self.saveGeometry())
         QtWidgets.QApplication.quit()
 
@@ -1081,6 +1236,12 @@ class BongoCatWindow(QtWidgets.QWidget):
         self.today_slaps_unsaved += 1
 
         self.config.slaps += 1
+
+        plant_stage_changed = self.plant_manager.record_slap()
+        if plant_stage_changed:
+            self.show_plant_sparkle()
+        elif not self.plant_sparkle_active:
+            self.update_plant_display()
 
         # Check for slap-based achievements
         newly_unlocked = self.achievement_manager.check_slap_count(self.config.slaps)

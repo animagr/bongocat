@@ -15,6 +15,8 @@ if os.path.exists('img'):
     datas += [('img', 'img')]
 if os.path.exists('skins'):
     datas += [('skins', 'skins')]
+if os.path.exists('plant'):
+    datas += [('plant', 'plant')]
 
 # Add config file if it exists
 if os.path.exists('bongo.ini'):

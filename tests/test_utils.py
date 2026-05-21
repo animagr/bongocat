@@ -29,6 +29,12 @@ class TestResourcePath(unittest.TestCase):
         self.assertIn("BongoCat", path)
         self.assertTrue(path.endswith("bongo.ini"))
 
+    def test_resource_path_plant_state(self):
+        """Test that plant_state.json goes to APPDATA directory."""
+        path = resource_path("plant_state.json")
+        self.assertIn("BongoCat", path)
+        self.assertTrue(path.endswith("plant_state.json"))
+
     def test_resource_path_bongo_ini_custom_appdata(self):
         """Test bongo.ini path with custom APPDATA."""
         with tempfile.TemporaryDirectory() as appdata:

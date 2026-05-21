@@ -39,6 +39,38 @@ SLAP_RESET_DELAY_MS = 100
 
 
 # =============================================================================
+# PLANT COMPANION
+# =============================================================================
+
+PLANT_AREA_WIDTH = 112
+"""int: Width of the plant companion area to the right of the cat."""
+
+PLANT_OVERLAP = 18
+"""int: Horizontal overlap between the cat image and plant area."""
+
+PLANT_Y_OFFSET = -50
+"""int: Vertical offset for the plant companion area; negative moves it up."""
+
+PLANT_BOTTOM_MARGIN = 8
+"""int: Distance from the plant companion bottom to the cat image bottom."""
+
+PLANT_STAGE_MAX_WIDTH = 96
+"""int: Maximum display width for plant stage art."""
+
+PLANT_STAGE_MAX_HEIGHT = 132
+"""int: Maximum display height for plant stage art."""
+
+PLANT_SPARKLE_MAX_WIDTH = 104
+"""int: Maximum display width for sparkle overlay."""
+
+PLANT_SPARKLE_MAX_HEIGHT = 132
+"""int: Maximum display height for sparkle overlay."""
+
+PLANT_SPARKLE_DURATION_MS = 3000
+"""int: Duration of the sparkle stage-change animation."""
+
+
+# =============================================================================
 # COMBO COUNTER SYSTEM
 # =============================================================================
 

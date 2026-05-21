@@ -115,8 +115,8 @@ class BongoCatBuilder:
         iss_content = f"""
 [Setup]
 AppName=Bongo Cat
-AppVersion=2.0.5
-AppPublisher=luinbytes
+AppVersion=2.0.6
+AppPublisher=animagr
 DefaultDirName={{autopf}}\\BongoCat
 DefaultGroupName=Bongo Cat
 OutputDir=dist
@@ -129,6 +129,7 @@ ArchitecturesInstallIn64BitMode=x64
 Source: "dist\\BongoCat.exe"; DestDir: "{{app}}"; Flags: ignoreversion
 Source: "img\\*"; DestDir: "{{app}}\\img"; Flags: ignoreversion recursesubdirs
 Source: "skins\\*"; DestDir: "{{app}}\\skins"; Flags: ignoreversion recursesubdirs
+Source: "plant\\*"; DestDir: "{{app}}\\plant"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{{group}}\\Bongo Cat"; Filename: "{{app}}\\BongoCat.exe"
