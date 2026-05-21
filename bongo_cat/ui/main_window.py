@@ -141,7 +141,9 @@ class BongoCatWindow(QtWidgets.QWidget):
         current_skin = self.skin_manager.current_skin
         if current_skin:
             rotation_degrees = current_skin.rotation_degrees
-            max_size = self.get_default_cat_display_size(rotation_degrees)
+            self.breathing_mode = current_skin.breathing_mode
+            self.breathing_speed = current_skin.breathing_speed or anim.IDLE_ANIMATION_SPEED
+            max_size = self.get_skin_display_size(current_skin)
 
             # Join skin path with image filename to get full path
             idle_path = os.path.join(current_skin.path, current_skin.images['idle'])
@@ -151,19 +153,26 @@ class BongoCatWindow(QtWidgets.QWidget):
             self.idle_pixmap_original = self.load_and_fix_image(
                 resource_path(idle_path),
                 rotation_degrees=rotation_degrees,
+                trim_transparent=current_skin.trim_transparent,
                 max_size=max_size
             )
             self.slap_pixmap_left_original = self.load_and_fix_image(
                 resource_path(left_path),
                 rotation_degrees=rotation_degrees,
+                trim_transparent=current_skin.trim_transparent,
                 max_size=max_size
             )
             self.slap_pixmap_right_original = self.load_and_fix_image(
                 resource_path(right_path),
                 rotation_degrees=rotation_degrees,
+                trim_transparent=current_skin.trim_transparent,
                 max_size=max_size
             )
+            if current_skin.trim_transparent:
+                self.normalize_skin_frame_sizes(max_size)
         else:
+            self.breathing_mode = "stretch"
+            self.breathing_speed = anim.IDLE_ANIMATION_SPEED
             # Fallback to default images
             self.idle_pixmap_original = self.load_and_fix_image(
                 resource_path("img/cat-rest.png")
@@ -180,8 +189,21 @@ class BongoCatWindow(QtWidgets.QWidget):
         self.slap_pixmap_left = QtGui.QPixmap(self.slap_pixmap_left_original)
         self.slap_pixmap_right = QtGui.QPixmap(self.slap_pixmap_right_original)
 
-        self.cat_width = self.idle_pixmap.width()
-        self.cat_height = self.idle_pixmap.height()
+        if self.breathing_mode == "scale":
+            max_breath_scale = max(1.0, anim.IDLE_MAX_STRETCH)
+            self.cat_width = int(math.ceil(max(
+                self.idle_pixmap.width(),
+                self.slap_pixmap_left.width(),
+                self.slap_pixmap_right.width()
+            ) * max_breath_scale))
+            self.cat_height = int(math.ceil(max(
+                self.idle_pixmap.height(),
+                self.slap_pixmap_left.height(),
+                self.slap_pixmap_right.height()
+            ) * max_breath_scale))
+        else:
+            self.cat_width = self.idle_pixmap.width()
+            self.cat_height = self.idle_pixmap.height()
         self.footer_height = anim.FOOTER_HEIGHT
         self.update_window_size()
 
@@ -272,7 +294,9 @@ class BongoCatWindow(QtWidgets.QWidget):
             return
 
         # Use sine wave for smoother animation
-        angle = (self.animation_time if hasattr(self, 'animation_time') else 0) + anim.IDLE_ANIMATION_SPEED
+        angle = (
+            self.animation_time if hasattr(self, 'animation_time') else 0
+        ) + getattr(self, 'breathing_speed', anim.IDLE_ANIMATION_SPEED)
         self.animation_time = angle % (2 * math.pi)
         
         # Smoother sine wave oscillation
@@ -286,6 +310,14 @@ class BongoCatWindow(QtWidgets.QWidget):
     
     def update_stretched_image(self):
         """Apply the current stretch factor to the current image."""
+        if getattr(self, 'breathing_mode', 'stretch') == "scale":
+            self.update_scaled_breathing_image()
+            return
+
+        self.update_stretch_breathing_image()
+
+    def update_stretch_breathing_image(self):
+        """Apply the original Bongo Cat slice-stretch breathing animation."""
         # Determine which source image to use
         if self.current_image == "idle":
             source_pixmap = self.idle_pixmap_original
@@ -362,6 +394,80 @@ class BongoCatWindow(QtWidgets.QWidget):
             
         # Update the cat label
         self.cat_label.setPixmap(new_pixmap)
+
+    def update_scaled_breathing_image(self):
+        """Apply aspect-preserving whole-image breathing animation."""
+        if self.current_image == "idle":
+            source_pixmap = self.idle_pixmap_original
+        elif self.current_image == "left":
+            source_pixmap = self.slap_pixmap_left_original
+        elif self.current_image == "right":
+            source_pixmap = self.slap_pixmap_right_original
+        else:
+            source_pixmap = self.idle_pixmap_original
+
+        new_pixmap = QtGui.QPixmap(self.cat_width, self.cat_height)
+        new_pixmap.fill(QtCore.Qt.GlobalColor.transparent)
+
+        if self.config.invert_cat:
+            source_pixmap = QtGui.QPixmap.fromImage(
+                source_pixmap.toImage().mirrored(horizontal=True, vertical=False)
+            )
+
+        scaled_pixmap = source_pixmap.scaled(
+            max(1, int(source_pixmap.width() * self.stretch_factor)),
+            max(1, int(source_pixmap.height() * self.stretch_factor)),
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+
+        painter = QtGui.QPainter(new_pixmap)
+        x = (self.cat_width - scaled_pixmap.width()) // 2
+        y = self.cat_height - scaled_pixmap.height()
+        painter.drawPixmap(x, y, scaled_pixmap)
+        painter.end()
+
+        if self.current_image == "idle":
+            self.idle_pixmap = new_pixmap
+        elif self.current_image == "left":
+            self.slap_pixmap_left = new_pixmap
+        elif self.current_image == "right":
+            self.slap_pixmap_right = new_pixmap
+
+        self.cat_label.setPixmap(new_pixmap)
+
+    def normalize_skin_frame_sizes(self, max_size=None):
+        """Pad loaded skin frames to one shared transparent canvas size."""
+        if max_size:
+            width = max_size.width()
+            height = max_size.height()
+        else:
+            width = max(
+                self.idle_pixmap_original.width(),
+                self.slap_pixmap_left_original.width(),
+                self.slap_pixmap_right_original.width()
+            )
+            height = max(
+                self.idle_pixmap_original.height(),
+                self.slap_pixmap_left_original.height(),
+                self.slap_pixmap_right_original.height()
+            )
+
+        self.idle_pixmap_original = self.pad_pixmap_to_size(
+            self.idle_pixmap_original,
+            width,
+            height
+        )
+        self.slap_pixmap_left_original = self.pad_pixmap_to_size(
+            self.slap_pixmap_left_original,
+            width,
+            height
+        )
+        self.slap_pixmap_right_original = self.pad_pixmap_to_size(
+            self.slap_pixmap_right_original,
+            width,
+            height
+        )
 
     def update_plant_display(self, sparkle: bool = False):
         """Render the current daily plant stage."""
@@ -643,20 +749,72 @@ class BongoCatWindow(QtWidgets.QWidget):
     # ----------------------
     #  Image Handling
     # ----------------------
-    def get_default_cat_display_size(self, rotation_degrees):
-        """Return the built-in cat's displayed size after rotation."""
-        default_pixmap = QtGui.QPixmap(resource_path("img/cat-rest.png"))
-        if default_pixmap.isNull():
+    def get_skin_display_size(self, skin):
+        """Return the requested skin display size or the screen fit fallback."""
+        if skin.display_size:
+            return QtCore.QSize(
+                max(1, skin.display_size['width']),
+                max(1, skin.display_size['height'])
+            )
+
+        return self.get_screen_fit_size(skin.breathing_mode)
+
+    def get_screen_fit_size(self, breathing_mode="stretch"):
+        """Return the maximum cat image size that can fit on the current screen."""
+        screen = QtWidgets.QApplication.primaryScreen()
+        if not screen:
             return None
 
-        transform = QtGui.QTransform()
-        transform.rotate(rotation_degrees)
-        return default_pixmap.transformed(
-            transform,
-            Qt.TransformationMode.SmoothTransformation
-        ).size()
+        geometry = screen.availableGeometry()
+        width = max(1, geometry.width() - anim.PLANT_AREA_WIDTH + anim.PLANT_OVERLAP)
+        height = max(1, geometry.height() - anim.FOOTER_HEIGHT)
 
-    def load_and_fix_image(self, path, rotation_degrees=None, max_size=None):
+        if breathing_mode == "scale":
+            max_breath_scale = max(1.0, anim.IDLE_MAX_STRETCH)
+            width = max(1, int(width / max_breath_scale))
+            height = max(1, int(height / max_breath_scale))
+
+        return QtCore.QSize(width, height)
+
+    def trim_pixmap_to_alpha(self, pixmap):
+        """Crop transparent padding from a pixmap."""
+        image = pixmap.toImage().convertToFormat(QtGui.QImage.Format.Format_ARGB32)
+        width = image.width()
+        height = image.height()
+        min_x = width
+        min_y = height
+        max_x = -1
+        max_y = -1
+
+        for y in range(height):
+            for x in range(width):
+                if QtGui.qAlpha(image.pixel(x, y)) > 0:
+                    min_x = min(min_x, x)
+                    min_y = min(min_y, y)
+                    max_x = max(max_x, x)
+                    max_y = max(max_y, y)
+
+        if max_x < min_x or max_y < min_y:
+            return pixmap
+
+        return QtGui.QPixmap.fromImage(
+            image.copy(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
+        )
+
+    def pad_pixmap_to_size(self, pixmap, width, height):
+        """Place a pixmap bottom-centered on a transparent canvas."""
+        canvas = QtGui.QPixmap(width, height)
+        canvas.fill(QtCore.Qt.GlobalColor.transparent)
+
+        painter = QtGui.QPainter(canvas)
+        x = (width - pixmap.width()) // 2
+        y = height - pixmap.height()
+        painter.drawPixmap(x, y, pixmap)
+        painter.end()
+
+        return canvas
+
+    def load_and_fix_image(self, path, rotation_degrees=None, trim_transparent=False, max_size=None):
         """Load, rotate, and optionally scale an image for display."""
         try:
             pixmap = QtGui.QPixmap(resource_path(path))
@@ -670,6 +828,9 @@ class BongoCatWindow(QtWidgets.QWidget):
                 transform,
                 Qt.TransformationMode.SmoothTransformation
             )
+
+            if trim_transparent:
+                pixmap = self.trim_pixmap_to_alpha(pixmap)
 
             if max_size and (
                 pixmap.width() > max_size.width()

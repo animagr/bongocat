@@ -53,7 +53,14 @@ Create a `skin.json` file with metadata:
     "left": "cat-left.png",
     "right": "cat-right.png"
   },
-  "rotation_degrees": -13
+  "rotation_degrees": -13,
+  "breathing_mode": "stretch",
+  "breathing_speed": 0.05,
+  "trim_transparent": false,
+  "display_size": {
+    "width": 224,
+    "height": 168
+  }
 }
 ```
 
@@ -64,6 +71,10 @@ Create a `skin.json` file with metadata:
 - `description` - Brief theme description
 - `images` - Image file names (relative to skin folder)
 - `rotation_degrees` - Rotation angle (default: -13)
+- `breathing_mode` - `stretch` uses the original Bongo Cat slice-stretch animation; `scale` breathes by uniformly scaling the whole image without warping its aspect ratio.
+- `breathing_speed` - Optional idle breathing speed override. Lower values breathe more slowly; default is `0.05`.
+- `trim_transparent` - Optional boolean. When true, transparent padding is cropped before scaling.
+- `display_size` - Optional maximum display box in pixels. Images scale into this box with their aspect ratio preserved, and the app window resizes to the resulting skin size.
 
 ### Step 4: Test Your Skin
 

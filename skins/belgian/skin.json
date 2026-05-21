@@ -8,5 +8,12 @@
     "left": "left.png",
     "right": "right.png"
   },
-  "rotation_degrees": 0
+  "rotation_degrees": 0,
+  "breathing_mode": "scale",
+  "breathing_speed": 0.025,
+  "trim_transparent": true,
+  "display_size": {
+    "width": 224,
+    "height": 168
+  }
 }

@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Per-skin `rotation_degrees` support when loading skin images.
-- Automatic runtime scaling for oversized skin images so custom skins fit the default Bongo Cat display footprint.
+- Per-skin `breathing_mode` and `breathing_speed` support, including aspect-preserving whole-image breathing for non-Bongo-shaped skins.
+- Optional per-skin `display_size` and `trim_transparent` metadata for scaling oversized custom skins while preserving their visible aspect ratio.
 - Belgian skin assets and metadata.
 
 ## [2.0.6] - 2026-05-20

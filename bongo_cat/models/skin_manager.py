@@ -21,6 +21,10 @@ class SkinInfo:
         path: Path to the skin directory
         images: Dictionary mapping image types to filenames
         rotation_degrees: Image rotation in degrees
+        breathing_mode: Breathing animation mode ("stretch" or "scale")
+        display_size: Optional maximum display size with width and height
+        trim_transparent: Whether to crop transparent padding before scaling
+        breathing_speed: Optional animation speed override
     """
     name: str
     author: str
@@ -29,6 +33,10 @@ class SkinInfo:
     path: str
     images: Dict[str, str]
     rotation_degrees: int = -13
+    breathing_mode: str = "stretch"
+    display_size: Optional[Dict[str, int]] = None
+    trim_transparent: bool = False
+    breathing_speed: Optional[float] = None
 
 
 class SkinManager:
@@ -80,6 +88,43 @@ class SkinManager:
                 with open(metadata_path, 'r', encoding='utf-8') as f:
                     metadata = json.load(f)
 
+                breathing_mode = metadata.get('breathing_mode', 'stretch')
+                if breathing_mode not in ('stretch', 'scale'):
+                    logger.warning(
+                        f"Skin {skin_dir} has invalid breathing_mode "
+                        f"{breathing_mode!r}; using 'stretch'"
+                    )
+                    breathing_mode = 'stretch'
+
+                display_size = metadata.get('display_size')
+                if display_size is not None:
+                    if not isinstance(display_size, dict):
+                        logger.warning(
+                            f"Skin {skin_dir} has invalid display_size; ignoring it"
+                        )
+                        display_size = None
+                    else:
+                        try:
+                            display_size = {
+                                'width': int(display_size['width']),
+                                'height': int(display_size['height'])
+                            }
+                        except (KeyError, TypeError, ValueError):
+                            logger.warning(
+                                f"Skin {skin_dir} has invalid display_size; ignoring it"
+                            )
+                            display_size = None
+
+                breathing_speed = metadata.get('breathing_speed')
+                if breathing_speed is not None:
+                    try:
+                        breathing_speed = float(breathing_speed)
+                    except (TypeError, ValueError):
+                        logger.warning(
+                            f"Skin {skin_dir} has invalid breathing_speed; ignoring it"
+                        )
+                        breathing_speed = None
+
                 skin_info = SkinInfo(
                     name=metadata.get('name', skin_dir),
                     author=metadata.get('author', 'Unknown'),
@@ -91,7 +136,11 @@ class SkinManager:
                         'left': 'cat-left.png',
                         'right': 'cat-right.png'
                     }),
-                    rotation_degrees=metadata.get('rotation_degrees', -13)
+                    rotation_degrees=metadata.get('rotation_degrees', -13),
+                    breathing_mode=breathing_mode,
+                    display_size=display_size,
+                    trim_transparent=metadata.get('trim_transparent', False),
+                    breathing_speed=breathing_speed
                 )
 
                 # Validate that all required images exist
