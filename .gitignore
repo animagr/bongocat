@@ -37,4 +37,5 @@ slap_history.json
 # PyInstaller working files (keep bongo_cat.spec)
 *.spec.bak
 
-docs/
+CLAUDE.md
+AGENT.md
