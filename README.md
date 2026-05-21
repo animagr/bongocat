@@ -2,7 +2,7 @@
 
 ![Bongo Cat](img/cat-rest.png)
 
-A desktop pet that slaps its paws whenever you press a key or click a mouse button. Frameless, always-on-top, draggable. Tracks slap count, grows a daily sunflower companion, builds combos, and unlocks achievements as you use it.
+A desktop pet that slaps its paws whenever you press a key or click a mouse button. Frameless, always-on-top, draggable. Tracks slap count, grows a daily plant companion based on slap count, builds combos, and unlocks achievements as you use it.
 
 This fork removes sounds and associated dependencies, adds slap history by day saved in `slap_history.json`, and adds plant progress saved in `plant_state.json` in `%AppData%/BongoCat`.
 
@@ -136,6 +136,21 @@ History is saved when you quit the app. Format is `{"2026-05-15": 42, "2026-05-1
 Bongo Cat includes a small sunflower companion to the right of the cat. The plant grows from today's slap activity and resets to a seed each new day.
 
 Growth stages are saved separately in `plant_state.json` next to the config and slap history files. The plant does not use the lifetime slap count, so long-running installs still get a fresh daily growth loop.
+
+The app loads species from subfolders in the `plant/` directory and picks a random species each day. To add another companion plant, create a new folder under `plant/` with the same stage image names as the existing sunflower species, and include an optional `sparkle.png` overlay:
+
+- `seed.png`
+- `seedling.png`
+- `growing1.png`
+- `young.png`
+- `growing2.png`
+- `growing3.png`
+- `mature.png`
+- `flowering.png`
+- `seed-bearing.png`
+- `sparkle.png` (optional overlay shown on stage transitions)
+
+Restart the app after adding a new plant folder so it can be discovered. You can also change the daily growth thresholds in `bongo_cat/models/plant.py` by editing `PlantManager.STAGES`.
 
 Current sunflower stages:
 
