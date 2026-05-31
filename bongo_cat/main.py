@@ -1,7 +1,7 @@
 """Main entry point for Bongo Cat application."""
 
 import sys
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 
 from bongo_cat.utils import setup_logging
 from bongo_cat.ui import BongoCatWindow
@@ -31,7 +31,7 @@ def main():
     logger.info("Application initialized successfully")
 
     # Run application
-    exit_code = app.exec_()
+    exit_code = app.exec()
 
     # Cleanup
     input_manager.stop()

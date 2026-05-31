@@ -6,8 +6,8 @@ from .input import InputManager
 from .utils import resource_path, setup_logging
 from . import animations
 
-__version__ = "2.0.7"
-__author__ = "luinbytes"
+__version__ = "2.0.9"
+__author__ = "animagr"
 __description__ = "Interactive desktop pet that responds to keyboard and mouse inputs"
 
 __all__ = [

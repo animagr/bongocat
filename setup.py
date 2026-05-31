@@ -11,12 +11,12 @@ if os.path.exists("README.md"):
 
 setup(
     name="bongo-cat",
-    version="2.0.7",
-    author="luinbytes",
+    version="2.0.9",
+    author="animagr",
     description="Interactive desktop pet that responds to keyboard and mouse inputs",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/luinbytes/bongocat",
+    url="https://github.com/animagr/bongocat",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -33,7 +33,7 @@ setup(
     ],
     python_requires=">=3.8",
     install_requires=[
-        "PyQt5>=5.15.10",
+        "PySide6>=6.10.0",
         "pynput>=1.7.6",
         "pywin32>=306; platform_system=='Windows'",
     ],

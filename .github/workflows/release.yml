@@ -50,7 +50,7 @@ jobs:
           cache: 'pip'
           cache-dependency-path: requirements.txt
 
-      - name: Install Linux runtime libs for PyQt5 xcb
+      - name: Install Linux runtime libs for Qt6 xcb
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update

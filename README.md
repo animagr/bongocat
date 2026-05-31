@@ -22,7 +22,7 @@ Latest: https://github.com/animagr/bongocat/releases/latest
 
 ## Run from source
 
-Requires Python 3.8–3.11 (PyQt5 does not ship wheels for 3.13+).
+Requires Python 3.9+ (built with PySide6 / Qt6).
 
 ```bash
 git clone https://github.com/animagr/bongocat.git

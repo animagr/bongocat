@@ -22,12 +22,12 @@ if os.path.exists('plant'):
 if os.path.exists('bongo.ini'):
     datas += [('bongo.ini', '.')]
 
-# Collect PyQt5 data files
-datas += collect_data_files('PyQt5')
+# Collect PySide6 data files
+datas += collect_data_files('PySide6')
 
 # Collect hidden imports
 hiddenimports = []
-hiddenimports += collect_submodules('PyQt5')
+hiddenimports += collect_submodules('PySide6')
 hiddenimports += ['pynput.keyboard', 'pynput.mouse']
 
 a = Analysis(
@@ -39,7 +39,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['PyQt5'],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -77,7 +77,7 @@ if sys.platform == 'darwin':
         exe,
         name='BongoCat.app',
         icon='img/cat-rest.png' if os.path.exists('img/cat-rest.png') else None,
-        bundle_identifier='com.luinbytes.bongocat',
+        bundle_identifier='com.animagr.bongocat',
         info_plist={
             'NSPrincipalClass': 'NSApplication',
             'NSHighResolutionCapable': 'True',

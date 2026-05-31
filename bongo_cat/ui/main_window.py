@@ -10,14 +10,11 @@ import logging
 from datetime import date
 from typing import Optional
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QGraphicsDropShadowEffect, QSystemTrayIcon, QMenu, QAction
-from PyQt5.QtCore import QSettings, Qt
-
-try:
-    from PyQt5 import sip
-except ImportError:  # older PyQt5 ships sip as a top-level module
-    import sip  # type: ignore
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtWidgets import QGraphicsDropShadowEffect, QSystemTrayIcon, QMenu
+from PySide6.QtGui import QAction
+from PySide6.QtCore import QSettings, Qt
+from shiboken6 import isValid
 
 from ..models import ConfigManager, SkinManager, AchievementManager, PlantManager
 from ..utils import resource_path
@@ -42,7 +39,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         current_side: Current paw side ("left" or "right")
     """
     
-    trigger_slap = QtCore.pyqtSignal()
+    trigger_slap = QtCore.Signal()
 
     def __init__(self):
         """Initialize the Bongo Cat window."""
@@ -1117,7 +1114,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         """Handle mouse press events."""
         if event.button() == Qt.MouseButton.LeftButton:
             if self.footer_widget.geometry().contains(event.pos()) or self.cat_label.geometry().contains(event.pos()):
-                self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
+                self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
                 self.setCursor(Qt.CursorShape.ClosedHandCursor)
                 self.footer_animation.stop()
                 if self._footer_effect_alive():
@@ -1131,7 +1128,7 @@ class BongoCatWindow(QtWidgets.QWidget):
     def mouseMoveEvent(self, event):
         """Handle mouse move events."""
         if self.drag_position and event.buttons() & Qt.MouseButton.LeftButton:
-            self.move(event.globalPos() - self.drag_position)
+            self.move(event.globalPosition().toPoint() - self.drag_position)
             event.accept()
 
     def mouseReleaseEvent(self, event):
@@ -1254,7 +1251,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         quit_action.triggered.connect(self.quit_app)
         menu.addAction(quit_action)
         
-        menu.exec_(self.mapToGlobal(position))
+        menu.exec(self.mapToGlobal(position))
 
     # ----------------------
     #  Window Management
@@ -1364,7 +1361,7 @@ class BongoCatWindow(QtWidgets.QWidget):
             effect = getattr(self, 'footer_opacity_effect', None)
             if effect is None:
                 return False
-            return not sip.isdeleted(effect)
+            return isValid(effect)
         except Exception:
             return False
 
@@ -1749,7 +1746,7 @@ class BongoCatWindow(QtWidgets.QWidget):
         msg_box.addButton(no_button)
         msg_box.setDefaultButton(no_button)
         
-        result = msg_box.exec_()
+        result = msg_box.exec()
         
         if result == QtWidgets.QMessageBox.StandardButton.Yes:
             self.reset_count()

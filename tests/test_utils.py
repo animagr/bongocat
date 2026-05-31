@@ -9,8 +9,8 @@ from unittest.mock import patch, MagicMock
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Mock dependencies if not installed to allow tests to run
-for module in ['PyQt5', 'PyQt5.QtCore', 'PyQt5.QtGui', 'PyQt5.QtWidgets',
-               'PyQt5.QtWidgets.QGraphicsDropShadowEffect', 'pynput', 'pynput.keyboard', 'pynput.mouse']:
+for module in ['PySide6', 'PySide6.QtCore', 'PySide6.QtGui', 'PySide6.QtWidgets',
+               'shiboken6', 'pynput', 'pynput.keyboard', 'pynput.mouse']:
     try:
         __import__(module)
     except ImportError:

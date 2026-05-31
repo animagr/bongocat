@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.9] - 2026-05-31
+
+### Changed
+
+- Migrated the UI framework from PyQt5 to PySide6 (Qt6), removing the Python 3.13+ wheel limitation that pinned the app to Python 3.11. Bongo Cat now runs on current Python versions (tested on 3.14).
+  
 ## [2.0.8] - 2026-05-21
 
 ### Changed
