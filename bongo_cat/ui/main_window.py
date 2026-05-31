@@ -122,6 +122,53 @@ class BongoCatWindow(QtWidgets.QWidget):
         # Ensure the window is tall enough to show the settings panel
         self.min_height_with_settings = anim.MIN_HEIGHT_WITH_SETTINGS
 
+    def showEvent(self, event):
+        """Strip the Windows 11 DWM border once the native handle exists."""
+        super().showEvent(event)
+        self._strip_windows_dwm_border()
+
+    def _strip_windows_dwm_border(self):
+        """Remove the 1px DWM border/rounded corners drawn on frameless,
+        translucent top-level windows on Windows 11.
+
+        Qt5 suppressed this; Qt6 leaves the DWM non-client frame visible,
+        which shows up as a faint rectangular outline around the cat.
+        """
+        if sys.platform != "win32":
+            return
+
+        import ctypes
+        from ctypes import wintypes
+
+        # DwmSetWindowAttribute constants
+        DWMWA_WINDOW_CORNER_PREFERENCE = 33
+        DWMWA_BORDER_COLOR = 34
+        DWMWCP_DONOTROUND = 1
+        DWMWA_COLOR_NONE = 0xFFFFFFFE
+
+        try:
+            hwnd = int(self.winId())
+            dwm = ctypes.windll.dwmapi
+            # Disable the border entirely (Windows 11 build 22000+).
+            border = wintypes.DWORD(DWMWA_COLOR_NONE)
+            dwm.DwmSetWindowAttribute(
+                wintypes.HWND(hwnd),
+                wintypes.DWORD(DWMWA_BORDER_COLOR),
+                ctypes.byref(border),
+                ctypes.sizeof(border),
+            )
+            # Square corners so no rounded-corner halo remains.
+            corner = wintypes.DWORD(DWMWCP_DONOTROUND)
+            dwm.DwmSetWindowAttribute(
+                wintypes.HWND(hwnd),
+                wintypes.DWORD(DWMWA_WINDOW_CORNER_PREFERENCE),
+                ctypes.byref(corner),
+                ctypes.sizeof(corner),
+            )
+        except (OSError, AttributeError) as exc:
+            # Older Windows (pre-11) lacks these attributes; harmless.
+            logger.debug("Could not strip DWM border: %s", exc)
+
     def setup_ui(self):
         """Initialize UI components."""
         self.setup_cat_images()
